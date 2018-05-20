@@ -1,11 +1,15 @@
 ## Install dependencies
 
-We'll work in a virtualenv
+### Use `virtualenv`
+
+We work in a [virtualenv](https://virtualenv.pypa.io/en/stable/) called `bgp` and highly recommend you to do the same.
+Have a look at [virtualenvwrapper](http://virtualenvwrapper.readthedocs.io/en/latest/install.html) for the easiest way to start.
 
 ```
 mkvirtualenv -p /usr/local/bin/python3 bgp
 ```
 
+From now on you can use `workon bgp` to be in the virtual environment.
 
 ### Download dependencies
 
