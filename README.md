@@ -55,7 +55,12 @@ python setup.py build
 python setup.py install
 ```
 
+### install remaining dependencies via `pip`
 
+```
+workon bgp
+pip install -r BGPDisplay/requirements.txt
+```
 
 # bgp-group
 

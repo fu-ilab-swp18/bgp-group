@@ -1,4 +1,5 @@
 import time
+import logging
 
 from _pybgpstream import BGPStream, BGPRecord, BGPElem
 from rtrlib import RTRManager, register_pfx_update_callback, register_spki_update_callback
@@ -8,6 +9,14 @@ from rtrlib import RTRManager, register_pfx_update_callback, register_spki_updat
 class BGPStats(object):
     """docstring for bgpStats"""
     def __init__(self, route_collector="rrc00", rpki_validator="rpki-validator.realmv6.org:8282"):
+        
+        print(__name__)
+        logger = logging.getLogger('rtrlib')
+        print(logger)
+
+        logger.setLevel(logging.DEBUG)
+        print(logger)
+
         self.rc = route_collector
 
         rpki = rpki_validator.split(":")
@@ -17,6 +26,7 @@ class BGPStats(object):
 
         self.stream = BGPStream()
         self.rec = BGPRecord()
+
 
 
     def _start_rtr_manager(self):

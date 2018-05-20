@@ -1,0 +1,12 @@
+asciimatics==1.9.0
+cffi==1.11.5
+enum34==1.1.6
+future==0.16.0
+Pillow==5.1.0
+pybgpstream==1.1.0
+pycparser==2.18
+pyfiglet==0.7.5
+rtrlib==0.1
+six==1.11.0
+urwid==2.0.1
+wcwidth==0.1.7
