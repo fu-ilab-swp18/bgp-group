@@ -2,6 +2,9 @@
 
 from _pybgpstream import BGPStream, BGPRecord, BGPElem
 
+def get_src_from_path(path_string):
+    return path_string.split(" ")[-1]
+
 # Create a new bgpstream instance and a reusable bgprecord instance
 stream = BGPStream()
 rec = BGPRecord()
@@ -28,4 +31,3 @@ while(stream.get_next_record(rec)):
             print(rec.project, rec.collector, rec.type, rec.time, rec.status)
             print(elem.type, elem.peer_address, elem.peer_asn, elem.fields)
             elem = rec.get_next_elem()
-
