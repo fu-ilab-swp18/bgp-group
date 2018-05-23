@@ -3,4 +3,6 @@ from classes.BGPStats import BGPStats
 
 test = BGPStats()
 
-test.mgr.stop()
+test.start_stream()
+
+test.get_records()

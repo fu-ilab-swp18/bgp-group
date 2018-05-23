@@ -1,5 +1,4 @@
-import time
-import logging
+from datetime import datetime
 
 from _pybgpstream import BGPStream, BGPRecord, BGPElem
 from rtrlib import RTRManager, register_pfx_update_callback, register_spki_update_callback
@@ -9,14 +8,6 @@ from rtrlib import RTRManager, register_pfx_update_callback, register_spki_updat
 class BGPStats(object):
     """docstring for bgpStats"""
     def __init__(self, route_collector="rrc00", rpki_validator="rpki-validator.realmv6.org:8282"):
-        
-        print(__name__)
-        logger = logging.getLogger('rtrlib')
-        print(logger)
-
-        logger.setLevel(logging.DEBUG)
-        print(logger)
-
         self.rc = route_collector
 
         rpki = rpki_validator.split(":")
@@ -37,14 +28,33 @@ class BGPStats(object):
                 print("Connection error")
                 exit()
 
-    def start_stream(self, intervall, route_collector=""):
+    def start_stream(self, start_time=None, end_time=0, route_collector=""):
+        """ Starts the 
+        """
+        hours = [0, 8, 16]
+
         if route_collector == "":
             route_collector = self.rc
         self.stream.add_filter('collector', route_collector)
-        if intervall is null:
-            self.stream.set_live_mode()
+
+        if (start_time is None) or not isinstance(start_time, datetime):
+            start_time = datetime.now()
+
+        if isinstance(end_time, datetime):
+            end = int(end_time.strftime("%s"))
         else:
-            self.stream.add_interval_filter(intervall[0],intervall[1])
+            end = 0
+
+        # get closest push
+        for i in range(0, len(hours)):
+            if hours[i+1] > start_time.hour:
+                break
+
+        start_time = start_time.replace(hour=hours[i],minute=0, second=0, microsecond=0)
+
+        start = int(start_time.strftime("%s"))
+        
+        self.stream.add_interval_filter(start, end)
         self.stream.start()
 
 
@@ -52,13 +62,14 @@ class BGPStats(object):
         while(self.stream.get_next_record(self.rec)):
             # Print the self.record information only if it is not a valid self.record
             if self.rec.status != "valid":
-                print(self.rec.project, self.rec.collector, self.rec.type, self.rec.time, self.rec.status)
+                print("Invalid Record:\n---")
+                print(self.rec.project, self.rec.collector, self.rec.type, self.rec.time, self.rec.status, "\n---\n")
             else:
                 elem = self.rec.get_next_elem()
                 while(elem):
                     # Print self.record and elem information
                     print(self.rec.project, self.rec.collector, self.rec.type, self.rec.time, self.rec.status)
                     print(elem.type, elem.peer_address, elem.peer_asn, elem.fields)
-                    prefix = elem.fields["prefix"].split('/')
+                    # prefix = elem.fields["prefix"].split('/')
                     # result = mgr.validate((int) elem.fields["as-path"].split(" ")[-1], prefix[0], prefix[1])
                     elem = self.rec.get_next_elem()
