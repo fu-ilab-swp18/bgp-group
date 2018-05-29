@@ -13,12 +13,10 @@ class BGPStats(object):
         rpki = rpki_validator.split(":")
         self.mgr = RTRManager(rpki[0],rpki[1])
 
-        self._start_rtr_manager()
+        # self._start_rtr_manager()
 
         self.stream = BGPStream()
         self.rec = BGPRecord()
-
-
 
     def _start_rtr_manager(self):
         self.mgr.start()
@@ -31,14 +29,15 @@ class BGPStats(object):
     def start_stream(self, start_time=None, end_time=0, route_collector=""):
         """ Starts the 
         """
-        hours = [0, 8, 16]
+        hours = [0, 8, 16, 24]
 
         if route_collector == "":
             route_collector = self.rc
         self.stream.add_filter('collector', route_collector)
+        self.stream.add_filter('record-type','ribs')
 
         if (start_time is None) or not isinstance(start_time, datetime):
-            start_time = datetime.now()
+            start_time = datetime.utcnow()
 
         if isinstance(end_time, datetime):
             end = int(end_time.strftime("%s"))
@@ -50,16 +49,18 @@ class BGPStats(object):
             if hours[i+1] > start_time.hour:
                 break
 
-        start_time = start_time.replace(hour=hours[i],minute=0, second=0, microsecond=0)
-
+        start_time = start_time.replace(hour=12, minute=0, second=0, microsecond=0)
+        yesterday = 1527163200
         start = int(start_time.strftime("%s"))
         
-        self.stream.add_interval_filter(start, end)
+        self.stream.add_interval_filter(1527163200, 1527183200)
+        print('Start stream with', start_time, end_time)
         self.stream.start()
 
 
     def get_records(self):
         while(self.stream.get_next_record(self.rec)):
+
             # Print the self.record information only if it is not a valid self.record
             if self.rec.status != "valid":
                 print("Invalid Record:\n---")
@@ -73,3 +74,5 @@ class BGPStats(object):
                     # prefix = elem.fields["prefix"].split('/')
                     # result = mgr.validate((int) elem.fields["as-path"].split(" ")[-1], prefix[0], prefix[1])
                     elem = self.rec.get_next_elem()
+
+        print("done.")
