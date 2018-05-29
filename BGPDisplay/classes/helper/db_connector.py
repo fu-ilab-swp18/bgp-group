@@ -2,8 +2,11 @@ import sqlite3
 
 class SQLiteConnector(object):
 	"""docstring for SQLiteConnector"""
-	def __init__(self, path_to_db="bgp.db"):
-		self.connection = sqlite3.connect(path_to_db)
+	def __init__(self, path_to_db="bgp.db", read_only=True):
+		if read_only:
+			self.connection = sqlite3.connect('file:'+path_to_db+'?mode=ro', uri=True)
+		else:
+			self.connection = sqlite3.connect(path_to_db)
 
 	def __del__(self):
 		self.connection.close()
