@@ -19,7 +19,6 @@ def display(screen, scene):
 
 
 if __name__ == '__main__':
-    print("test - main")
     last_scene = None
     while True:
         try:
