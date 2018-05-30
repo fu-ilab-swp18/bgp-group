@@ -1,4 +1,4 @@
-from classes.BGPStats import BGPStats
+from classes import BGPStats
 
 
 test = BGPStats()
