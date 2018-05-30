@@ -5,13 +5,29 @@ from rtrlib import RTRManager, register_pfx_update_callback, register_spki_updat
 
 from helper.db_connector import SQLiteConnector as DBConnector
 
-if __name__ == '__main__':
-	import click
 
-	@click.command()
-	def main():
-		click.echo("Test")
-		# data_aggregator = BGPDataAggregator()
+class BGPDataAggregator(object):
+    """docstring for BGPDataAggregator"""
 
-	main()
+    def __init__(self, route_collector="rrc00", rpki_validator="rpki-validator.realmv6.org:8282"):
+        self.rc = route_collector
 
+        rpki = rpki_validator.split(":")
+        self.mgr = RTRManager(rpki[0], rpki[1])
+
+        # self._start_rtr_manager()
+
+        self.stream = BGPStream()
+        self.rec = BGPRecord()
+
+    def __del__(self):
+        if self.mgr.is_synced():
+            self.mgr.stop()
+
+    def _start_rtr_manager(self):
+        self.mgr.start()
+        while not self.mgr.is_synced():
+            sleep(0.2)
+            if status.error:
+                print("Connection error")
+                exit()
