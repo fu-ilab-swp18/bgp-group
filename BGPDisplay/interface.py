@@ -6,21 +6,25 @@ from interface import BGPInfoView, BGPRouteUpdatesView, BGPRouteValidationsView,
 
 
 def display(screen, scene):
-  rows = 2
-  columns = 2
+    rows = 2
+    columns = 2
 
-  route_updates = BGPRouteUpdatesView(screen, 0, 0, rows, columns)
-  info = BGPInfoView(screen, 0, 1, rows, columns)
-  route_validations = BGPRouteValidationsView(screen, 1, 0, rows, columns)
-  statistics = BGPStatisticsView(screen, 1, 1, rows, columns)
+    route_updates = BGPRouteUpdatesView(screen, 0, 0, rows, columns)
+    info = BGPInfoView(screen, 0, 1, rows, columns)
+    route_validations = BGPRouteValidationsView(screen, 1, 0, rows, columns)
+    statistics = BGPStatisticsView(screen, 1, 1, rows, columns)
 
-  scenes = [Scene([route_updates, info, route_validations, statistics], -1)]
-  screen.play(scenes, stop_on_resize=True, start_scene=scene)
+    scenes = [Scene([route_updates, info, route_validations, statistics], -1)]
+    screen.play(scenes, stop_on_resize=True, start_scene=scene)
 
-last_scene = None
-while True:
-  try:
-    Screen.wrapper(display, catch_interrupt=False, arguments=[last_scene])
-    sys.exit(0)
-  except ResizeScreenError as e:
-    last_scene = e.scene
+
+if __name__ == '__main__':
+    print("test - main")
+    last_scene = None
+    while True:
+        try:
+            Screen.wrapper(display, catch_interrupt=False,
+                           arguments=[last_scene])
+            sys.exit(0)
+        except ResizeScreenError as e:
+            last_scene = e.scene

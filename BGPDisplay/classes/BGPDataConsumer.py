@@ -6,12 +6,11 @@ from rtrlib import RTRManager, register_pfx_update_callback, register_spki_updat
 from helper.db_connector import SQLiteConnector as DBConnector
 
 if __name__ == '__main__':
-	import click
+    import click
 
-	@click.command()
-	def main():
-		click.echo("Test")
-		# data_aggregator = BGPDataAggregator()
+    @click.command()
+    def main():
+        click.echo("Test")
+        # data_aggregator = BGPDataAggregator()
 
-	main()
-
+    main()

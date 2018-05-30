@@ -1,2 +1,2 @@
 def split_path():
-	pass
+    pass

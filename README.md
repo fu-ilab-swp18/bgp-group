@@ -86,7 +86,7 @@ Vantage Punkte untersuchen
 
 ## Route views - Zeiten
 
-###  
+###
 
 - 00:00
 - 02:00
@@ -94,3 +94,7 @@ Vantage Punkte untersuchen
 - 06:00
 - 08:00
 - ...
+
+## Vantage Points vs Route Collectoren
+
+Vantage Point hat ASN & IP
