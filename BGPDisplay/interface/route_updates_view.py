@@ -14,7 +14,7 @@ class BGPRouteUpdatesView(BGPColumnView):
                       BarChart(
                           10, 20,
                           [self._wv(1), self._wv(2)],
-                          colour=Screen.COLOUR_WHITE,
+                          colour=Screen.COLOUR_BLACK,
                           axes=BarChart.X_AXIS,
                           scale=2.0),
                       x=0, y=0, transparent=False, speed=2)
