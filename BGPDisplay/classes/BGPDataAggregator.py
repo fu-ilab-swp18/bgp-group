@@ -4,12 +4,13 @@ from _pybgpstream import BGPStream, BGPRecord, BGPElem
 from rtrlib import RTRManager, register_pfx_update_callback, register_spki_update_callback
 
 from .helper.db_connector import SQLiteConnector as DBConnector
+from .helper.dataTuples import VantagePointMeta, RouteCollectorMeta, Route
 
 
 class BGPDataAggregator(object):
     """docstring for BGPDataAggregator"""
 
-    def __init__(self, route_collector="rrc00", rpki_validator="rpki-validator.realmv6.org:8282"):
+    def __init__(self, route_collector="rrc00", rpki_validator="rpki-validator.realmv6.org:8282", db="metasnap.db"):
         self.rc = route_collector
 
         rpki = rpki_validator.split(":")
@@ -19,6 +20,7 @@ class BGPDataAggregator(object):
 
         self.stream = BGPStream()
         self.rec = BGPRecord()
+        self.route_table = dict()
 
     def __del__(self):
         if self.mgr.is_synced():

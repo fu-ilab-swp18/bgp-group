@@ -18,6 +18,8 @@ class SQLiteConnector(object):
 
     def init_db(self):
         """Creates all the tables needed"""
+        for statement in file('../sql/sqlite/create_tables.sql').read().split(';'):
+            cur.execute(statement)
         pass
 
     def set_records(self, record):
