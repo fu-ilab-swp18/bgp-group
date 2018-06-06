@@ -1,4 +1,5 @@
 from datetime import datetime
+import ipaddress
 
 from _pybgpstream import BGPStream, BGPRecord, BGPElem
 from rtrlib import RTRManager, register_pfx_update_callback, register_spki_update_callback
@@ -22,11 +23,6 @@ class BGPStats(object):
 
     def _start_rtr_manager(self):
         self.mgr.start()
-        while not self.mgr.is_synced():
-            sleep(0.2)
-            if status.error:
-                print("Connection error")
-                exit()
 
     def start_stream(self, start_time=None, end_time=0, route_collector=""):
         """ Starts the
@@ -36,7 +32,7 @@ class BGPStats(object):
         if route_collector == "":
             route_collector = self.rc
         self.stream.add_filter('collector', route_collector)
-        self.stream.add_filter('record-type', 'ribs')
+        # self.stream.add_filter('record-type', 'ribs')
 
         if (start_time is None) or not isinstance(start_time, datetime):
             start_time = datetime.utcnow()
@@ -61,23 +57,37 @@ class BGPStats(object):
         self.stream.start()
 
     def get_records(self):
+        print("get_records:")
         while(self.stream.get_next_record(self.rec)):
 
             # Print the self.record information only if it is not a valid self.record
-            if self.rec.status != "valid":
-                print("Invalid Record:\n---")
-                print(self.rec.project, self.rec.collector, self.rec.type,
-                      self.rec.time, self.rec.status, "\n---\n")
-            else:
+            if self.rec.status == "valid":
+                print('--', self.rec.project, self.rec.collector,
+                      self.rec.type, self.rec.time, self.rec.status, '--')
                 elem = self.rec.get_next_elem()
+
                 while(elem):
-                    # Print self.record and elem information
-                    print(self.rec.project, self.rec.collector,
-                          self.rec.type, self.rec.time, self.rec.status)
-                    print(elem.type, elem.peer_address,
-                          elem.peer_asn, elem.fields)
-                    # prefix = elem.fields["prefix"].split('/')
-                    # result = mgr.validate((int) elem.fields["as-path"].split(" ")[-1], prefix[0], prefix[1])
+                    if elem.type is 'R' or elem.type is 'A':
+                        asn = int(elem.fields['as-path'].split(' ')[-1])
+                        prefix = ipaddress.ip_interface(elem.fields['prefix'])
+                        ip = prefix.ip.compressed
+                        mask_len = int(prefix.with_prefixlen.split('/')[1])
+
+                        validated = self.mgr.validate(asn, ip, mask_len)
+
+                        print(validated)
+
+                    elif elem.type is 'W':
+                        print("Withdrawal:", elem.peer_address, elem.peer_asn, elem.fields)
+
+                    elif elem.type is 'S':
+                        print("Peerstate:", elem.peer_address, elem.peer_asn, elem.fields)
+
+                    else:
+                        print("Unknown:", elem.peer_address, elem.peer_asn, elem.fields)
+
                     elem = self.rec.get_next_elem()
+
+            print('\n')
 
         print("done.")

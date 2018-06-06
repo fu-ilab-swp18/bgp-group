@@ -1,4 +1,4 @@
-from datetime import datetime
+ from datetime import datetime
 
 from _pybgpstream import BGPStream, BGPRecord, BGPElem
 from rtrlib import RTRManager, register_pfx_update_callback, register_spki_update_callback

@@ -1,4 +1,4 @@
-CREATE TABLE vantagepoint_metadata (
+CREATE TABLE IF NOT EXISTS vantagepoint_metadata (
    vpid TEXT NOT NULL,
    rcid TEXT NOT NULL,
    timestamp INTEGER NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE vantagepoint_metadata (
    PRIMARY KEY (vpid, rcid, timestamp)
 );
 
-CREATE TABLE routecollector_metadata (
+CREATE TABLE IF NOT EXISTS routecollector_metadata (
    rcid TEXT NOT NULL,
    timestamp INTEGER NOT NULL,
    rcloc TEXT NOT NULL,
