@@ -62,12 +62,20 @@ class BGPStats(object):
 
             # Print the self.record information only if it is not a valid self.record
             if self.rec.status == "valid":
-                print('--', self.rec.project, self.rec.collector,
-                      self.rec.type, self.rec.time, self.rec.status, '--')
+                # print('--', self.rec.project, self.rec.collector,
+                #       self.rec.type, self.rec.time, self.rec.status, '--')
                 elem = self.rec.get_next_elem()
 
                 while(elem):
                     if elem.type is 'R' or elem.type is 'A':
+
+                        asn = elem.fields['as-path'].split(' ')[-1]
+                        try:
+                            asn = int(asn)
+                        except ValueError:
+                            elem = self.rec.get_next_elem()
+                            continue
+
                         asn = int(elem.fields['as-path'].split(' ')[-1])
                         prefix = ipaddress.ip_interface(elem.fields['prefix'])
                         ip = prefix.ip.compressed
@@ -75,10 +83,12 @@ class BGPStats(object):
 
                         validated = self.mgr.validate(asn, ip, mask_len)
 
-                        print(validated)
+                        if validated.is_valid:
+                            print(validated)
 
                     elif elem.type is 'W':
-                        print("Withdrawal:", elem.peer_address, elem.peer_asn, elem.fields)
+                        pass
+                        # print("Withdrawal:", elem.peer_address, elem.peer_asn, elem.fields)
 
                     elif elem.type is 'S':
                         print("Peerstate:", elem.peer_address, elem.peer_asn, elem.fields)
@@ -88,6 +98,6 @@ class BGPStats(object):
 
                     elem = self.rec.get_next_elem()
 
-            print('\n')
+            # print('\n')
 
         print("done.")

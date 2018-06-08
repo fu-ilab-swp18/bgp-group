@@ -1,8 +1,3 @@
-from classes import BGPStats
+from classes import BGPDataAggregator
 
-
-test = BGPStats()
-
-test.start_stream()
-
-test.get_records()
+test = BGPDataAggregator()
