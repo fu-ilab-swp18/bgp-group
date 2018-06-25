@@ -64,6 +64,8 @@ class BGPDataAggregator(object):
                     prefix = elem.fields['prefix']
                     (ip, mask_len) = split_prefix(prefix)
 
+                    #!TODO Check if v4 or v6
+
                     validated = self.mgr.validate(origin_asn, ip, mask_len)
 
                     if elem.type is 'R' or elem.type is 'A':

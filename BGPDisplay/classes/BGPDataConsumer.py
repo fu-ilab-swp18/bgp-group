@@ -9,7 +9,7 @@ from .helper.db_connector import SQLiteConnector as DBConnector
 class BGPDataConsumer(object):
     """docstring for BGPDataAggregator"""
 
-    def __init__(self, route_collector="rrc00", rpki_validator="rpki-validator.realmv6.org:8282"):
+    def __init__(self, route_collector="rrc00", rpki_validator="rpki-validator.realmv6.org:8282", ):
         self.rc = route_collector
 
         rpki = rpki_validator.split(":")

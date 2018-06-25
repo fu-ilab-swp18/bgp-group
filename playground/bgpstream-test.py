@@ -9,6 +9,9 @@ def get_src_from_path(path_string):
 stream = BGPStream()
 rec = BGPRecord()
 
+stream.set_data_interface('singlefile')
+stream.set_data_interface_option('../bgp_dump.txt')
+
 # Consider RIPE RRC 10 only
 stream.add_filter('collector','rrc11')
 
