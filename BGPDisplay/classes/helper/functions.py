@@ -1,3 +1,13 @@
+def check_ipv4(ip):
+    if len(ip) <= 4:
+        return False
+    else:
+        if ip[1] is '.' or ip[2] is '.' or ip[3] is '.':
+            return True
+
+    return False
+
+
 def get_push_timestamp(time, hours=[0, 8, 16, 24]):
         # get closest push
         for i in range(0, len(hours)):
