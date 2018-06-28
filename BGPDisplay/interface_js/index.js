@@ -1,8 +1,11 @@
 var blessed = require('blessed'),
-    contrib = require('blessed-contrib');
+    contrib = require('blessed-contrib'),
+    moment = require('moment');
 
 var screen = blessed.screen();
 var grid = new contrib.grid({rows: 2, cols: 3, screen: screen});
+
+var db = require('./data');
 
 // announced prefixes
 
@@ -19,14 +22,6 @@ var prefixesChart = grid.set(0, 0, 1, 2, contrib.line, {
   wholeNumbersOnly: false
 });
 
-prefixesChart.setData([
-  {
-    title: '',
-    x: ['- 5 min', '- 10 min', '- 20 min', '- 30 min'],
-    y: [7, -5, 5, 10]
-  }
-]);
-
 // validated prefixes
 
 var validatedPrefixesChart = grid.set(1, 0, 1, 2, contrib.stackedBar, {
@@ -34,21 +29,9 @@ var validatedPrefixesChart = grid.set(1, 0, 1, 2, contrib.stackedBar, {
   // barWidth: 4,
   barSpacing: 15,
   xOffset: 0,
-  // maxValue: 15,
   // height: "40%",
   // width: "100%",
   barBgColor: ['yellow', 'green', 'red']
-});
-
-validatedPrefixesChart.setData({
-  barCategory: ['- 5 min', '- 10 min', '- 20 min', '- 30 min'],
-  stackedCategory: ['Unbekannt', 'Gültig', 'Ungültig'],
-  data: [
-    [7, 7, 5],
-    [8, 2, 0],
-    [0, 0, 0],
-    [2, 3, 2]
-  ]
 });
 
 // information
@@ -68,16 +51,75 @@ var statisticsTable = grid.set(1, 2, 1, 1, contrib.table, {
   height: '100%',
   border: {type: "line", fg: "cyan"},
   columnSpacing: 5, //in chars
-  columnWidth: [20, 30], /*in chars*/
-});
-
-statisticsTable.setData({
-  headers: [],
-  data: [
-    ['Standort des RC:', 'DE-CIX Frankfurt'],
-    ['Anzahl Routen:', 5],
-    ['Updates pro Minute:', 3]
-  ]
+  columnWidth: [25, 25], /*in chars*/
 });
 
 screen.render();
+
+
+var selectedRC = 'rrc00';
+
+function getTimeDifference(timestamp) {
+  var now = moment();
+  var time = moment.unix(timestamp);
+  var diff = time.diff(now, 'minutes');
+  return diff + ' min';
+}
+
+function updateData() {
+  db.getData().then(function (data) {
+
+    var times = [];
+    var prefixData = [];
+    data.rc[selectedRC].forEach(function (row) {
+      times.push(getTimeDifference(row.timestamp));
+      prefixData.push(row.announcedPrefixes);
+    });
+
+    prefixesChart.setData([
+      {
+        title: '',
+        x: times,
+        y: prefixData
+      }
+    ]);
+
+
+    times = [];
+    prefixData = [];
+    data.vp[selectedRC].forEach(function (row) {
+      times.push(getTimeDifference(row.timestamp));
+      prefixData.push([row.unknown, row.valid, row.invalid]);
+    });
+
+    validatedPrefixesChart.setData({
+      barCategory: times,
+      stackedCategory: ['Unbekannt', 'Gültig', 'Ungültig'],
+      data: prefixData
+    });
+
+
+    var rc = data.rc[selectedRC][0];
+
+    statisticsTable.setData({
+      headers: [],
+      data: [
+        ['ID des Route Collectors:', rc.rcid],
+        ['Standort des RC:', 'DE-CIX Frankfurt'],
+        ['Anzahl Peers:', rc.peers],
+        ['Bekannte Präfixe:', rc.prefix],
+        ['Davon IPv6:', rc.prefix6],
+        ['Davon IPv4:', rc.prefix4],
+        ['Letztes Update:', moment.unix(rc.timestamp).format("DD. MMM YYYY, HH:mm")]
+      ]
+    });
+
+    screen.render();
+
+    setTimeout(updateData, 300000);
+  });
+}
+
+db.init().then(function () {
+  updateData();
+});
