@@ -1,3 +1,5 @@
+import json
+import os
 import pickle
 import psycopg2
 from datetime import datetime, timezone
@@ -10,7 +12,19 @@ def get_timestamp_now():
 vp_meta = pickle.load(open("test.p", "rb"))
 rc_peers, prefix4, prefix6 = pickle.load(open("rc_data.p", "rb"))
 
-conn = psycopg2.connect("dbname='bgp' user='bgp' host='pg.a0s.de' password='pool-specter'")
+password = os.environ['PGPASS']
+settings = {}
+with open('settings.json') as f:
+    settings = json.load(f)
+
+db = settings['db']
+
+conn = psycopg2.connect(
+    dbname=db['name'],
+    user=db['user'],
+    host=db['host'],
+    password=password)
+
 cur = conn.cursor()
 
 sql = 'INSERT INTO "public"."VantagePoint_Metadata"("vpid", "rcid", "timestamp", "valid", "unknown", "invalid") VALUES(%s, %s, %s, %s, %s, %s)'

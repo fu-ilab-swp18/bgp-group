@@ -1,0 +1,8 @@
+{
+    "db": {
+        "type": "postgres",
+        "name": "bgp",
+        "host": "pg.a0s.de",
+        "user": "bgp"
+    }
+}
