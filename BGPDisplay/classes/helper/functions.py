@@ -1,3 +1,7 @@
+import json
+from datetime import datetime, timezone
+
+
 def check_ipv4(ip):
     if len(ip) <= 4:
         return False
@@ -14,9 +18,26 @@ def get_push_timestamp(time, hours=[0, 8, 16, 24]):
             if hours[i + 1] > time.hour:
                 break
 
-        time = time.replace(hour=hours[i], minute=1, second=0, microsecond=0)
+        time = time.replace(hour=hours[i], minute=0, second=0, microsecond=0)
 
         return int(time.timestamp())
+
+
+def get_settings(settings_json):
+    with open('settings.json') as f:
+        return json.load(f)
+
+    return False
+
+
+def get_timestamp_now(slot=0):
+    dt = datetime.now(timezone.utc)
+    for i in range(0, 60, slot):
+        if (i) > dt.minute:
+            break
+
+    dt = dt.replace(minute=(i - slot), second=0, microsecond=0)
+    return int(dt.timestamp())
 
 
 def split_prefix(prefix):

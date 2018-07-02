@@ -1,9 +1,11 @@
 import click
+from classes import BGPDataAggregator
+
 
 @click.command()
-def main():
-    click.echo("Test")
-    # data_aggregator = BGPDataAggregator()
+def backend():
+    BGPDataAggregator()
+
 
 @click.command()
 def interface():
@@ -18,5 +20,4 @@ def interface():
 
 
 if __name__ == '__main__':
-
-    print("test")
+    backend()

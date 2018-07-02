@@ -3,6 +3,7 @@
         "type": "postgres",
         "name": "bgp",
         "host": "pg.a0s.de",
-        "user": "bgp"
+        "user": "bgp",
+        "password": "use env.PGPASS"
     }
 }

@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 # from _pybgpstream import BGPStream, BGPRecord
 from rtrlib import RTRManager
 
-from .helper.db_connector import SQLiteConnector as DBConnector
+# from .helper.db_connector import SQLiteConnector as DBConnector
 from .helper.named_tuples import VantagePointMeta, RouteCollectorMeta, Route
 from .helper.functions import check_ipv4, get_push_timestamp, split_prefix
 

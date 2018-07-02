@@ -1,41 +1,46 @@
-import sqlite3
+import psycopg2 as pg
+import os.path
 
 
-class SQLiteConnector(object):
-    """
-    inspired by https://www.dataquest.io/blog/data-pipelines-tutorial/
-    """
+class PostgresConnector(object):
+    """Connects to a Database and offers the methods to
+    update the predefined tables"""
 
-    def __init__(self, path_to_db="bgp.db", read_only=True):
-        if read_only:
-            self.connection = sqlite3.connect(
-                'file:' + path_to_db + '?mode=ro', uri=True)
-        else:
-            self.connection = sqlite3.connect(path_to_db)
-            self.init_db()
+    def __init__(self, db):
+        self.conn = pg.connect(
+            dbname=db["name"], user=db["user"], host=db["host"], password=db["password"]
+        )
 
     def __del__(self):
-        self.connection.close()
+        self.conn.close()
 
-    def init_db(self):
-        """Creates all the tables needed"""
-        for statement in file('../sql/sqlite/create_tables.sql').read().split(';'):
-            self.cur.execute(statement)
+    def update_vp_meta(self, vp_meta):
 
-    def update_vantage_point_meta(self, vp_tuple):
-        pass
+        cur = self.conn.cursor()
+        dirname = os.path.dirname(__file__)
+        spl_path = os.path.join(dirname, '..', 'sql', 'postgres', 'update_vp_meta.sql')
 
-    def update_route_collector_meta(self, vp_tuple):
-        pass
+        with open(spl_path, 'r') as f:
+            statements = f.read().split(';')
 
-    def bgp_reset(self):
-        """Every 2 or 8 hours we get a hard reset to get on the current state"""
-        pass
+            for rc, peers in vp_meta.items():
+                for vp, peer in peers.items():
+                    cur.execute(statements[0], peer)
 
-    # def get_records(self, timestamp):
-    #     """Get all younger than timestamp"""
-    #     cur = self.connection.cursor()
-    #     cur.execute(
-    #         "SELECT remote_addr,time_local FROM logs WHERE created > ?", [time_obj])
-    #     resp = cur.fetchall()
-    #     return resp
+        self.conn.commit()
+        cur.close()
+
+    def update_rc_meta(self, rc_meta):
+
+        cur = self.conn.cursor()
+        dirname = os.path.dirname(__file__)
+        spl_path = os.path.join(dirname, '..', 'sql', 'postgres', 'update_rc_meta.sql')
+
+        with open(spl_path, 'r') as f:
+            statements = f.read().split(';')
+
+            for rc, meta in rc_meta.items():
+                    cur.execute(statements[0], meta)
+
+        self.conn.commit()
+        cur.close()
