@@ -4,6 +4,6 @@
         "name": "bgp",
         "host": "pg.a0s.de",
         "user": "bgp",
-        "password": "use env.PGPASS"
+        "password": "#env.PGPASS"
     }
 }
