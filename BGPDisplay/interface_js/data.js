@@ -1,9 +1,18 @@
 var pg = require('pg');
+var fs = require("fs");
+var path = require("path");
+
+var settings_path = path.join(__dirname, '..', 'settings.json');
+var settings = JSON.parse(fs.readFileSync(settings_path, 'utf-8'));
+
+var db = settings.db;
+db.password = process.env.PGPASS
+
 var client = new pg.Client({
-  host: 'pg.a0s.de',
-  user: 'bgp',
-  database: 'bgp',
-  password: process.env.PGPASS
+  host: db.host,
+  user: db.user,
+  database: db.name,
+  password: db.password
 });
 
 function init() {
