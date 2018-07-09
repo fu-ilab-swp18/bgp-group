@@ -134,7 +134,7 @@ class BGPDataAggregator(object):
                                     4 + validated.state.value
                                 ] += 1
                         else:
-                            if not self.metadata_vp[rec.collector].get(elem.peer_asn):
+                            if not self.metadata_vp[rec.collector].get((elem.peer_asn, elem.peer_address)):
                                 """Init the metadata-entry if it not exists already"""
                                 self.metadata_vp[rec.collector][(elem.peer_asn, elem.peer_address)] = [
                                     elem.peer_asn,
