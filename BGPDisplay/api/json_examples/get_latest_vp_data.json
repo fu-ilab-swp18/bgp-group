@@ -1,12 +1,12 @@
 {
-    "query": "v1/vp_data/get/latest",
+    "query": "v1/vp_data/get/rrc01,rrc02/all/latest",
     "time": {
         "from": 1531123200,
         "to": 1531123500
     },
     "data": {
         "rrc01": {
-            "001": {
+            "AS001": {
                 "123.123.123.123": {
                     "valid": 12,
                     "unknown": 13,
@@ -18,7 +18,7 @@
                     "invalid": 54
                 }
             },
-            "002": {
+            "AS002": {
                 "123.123.123.123": {
                     "valid": 12,
                     "unknown": 13,

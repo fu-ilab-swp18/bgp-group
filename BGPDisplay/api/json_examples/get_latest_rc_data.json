@@ -1,0 +1,19 @@
+{
+    "query": "v1/rc_data/get/rrc01,rrc01/latest",
+    "time": {
+        "from": 1531123200,
+        "to": 1531123500
+    },
+    "data": {
+        "rrc01": {
+            "peers": 13148318,
+            "prefix4": 734529,
+            "prefix6": 58170,
+        },
+        "rrc02": {
+            "peers": 13128118,
+            "prefix4": 71239,
+            "prefix6": 34531,
+        },
+    }
+}
