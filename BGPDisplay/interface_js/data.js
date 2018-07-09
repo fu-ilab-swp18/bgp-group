@@ -6,6 +6,8 @@ var client = new pg.Client({
   password: process.env.PGPASS
 });
 
+var timestampInterval = 300;
+
 function init() {
   if (!process.env.PGPASS) {
     throw new Error('Please set the password for the database first. PGPASS=foo');
@@ -19,7 +21,12 @@ function getData() {
     vp: {}
   };
 
-  return client.query('SELECT * FROM "RouteCollector_Metadata"')
+  return client.query(' \
+      SELECT * \
+      FROM "RouteCollector_Metadata" \
+      ORDER BY timestamp \
+      LIMIT 8 \
+    ')
     .then(function (res) {
       res.rows.forEach(function (row) {
         var rc = data.rc[row.rcid] = data.rc[row.rcid] || [];
@@ -33,12 +40,14 @@ function getData() {
         data.rc[row.rcid].push(row);
       });
 
-      return client.query(' \
-        SELECT rcid, timestamp, \
+      return client.query(` \
+        SELECT rcid, ROUND(timestamp / ${timestampInterval}) * ${timestampInterval} AS timestamp, \
                SUM(valid) AS valid, SUM(invalid) AS invalid, SUM(unknown) AS unknown \
         FROM "VantagePoint_Metadata" \
-        GROUP BY rcid, timestamp \
-      ');
+        GROUP BY rcid, ROUND(timestamp / ${timestampInterval}) \
+        ORDER BY timestamp \
+        LIMIT 7 \
+      `);
     })
 
     .then(function (res) {

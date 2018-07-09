@@ -26,12 +26,12 @@ var prefixesChart = grid.set(0, 0, 1, 2, contrib.line, {
 
 var validatedPrefixesChart = grid.set(1, 0, 1, 2, contrib.stackedBar, {
   label: 'RPKI-validierte Präfixe',
-  // barWidth: 4,
+  barWidth: 4,
   barSpacing: 15,
   xOffset: 0,
   // height: "40%",
   // width: "100%",
-  barBgColor: ['yellow', 'green', 'red']
+  barBgColor: ['green', 'red']
 });
 
 // information
@@ -60,10 +60,7 @@ screen.render();
 var selectedRC = 'rrc00';
 
 function getTimeDifference(timestamp) {
-  var now = moment();
-  var time = moment.unix(timestamp);
-  var diff = time.diff(now, 'minutes');
-  return diff + ' min';
+  return moment.unix(timestamp).fromNow();
 }
 
 function updateData() {
@@ -89,12 +86,12 @@ function updateData() {
     prefixData = [];
     data.vp[selectedRC].forEach(function (row) {
       times.push(getTimeDifference(row.timestamp));
-      prefixData.push([row.unknown, row.valid, row.invalid]);
+      prefixData.push([row.valid, row.invalid]);
     });
 
     validatedPrefixesChart.setData({
       barCategory: times,
-      stackedCategory: ['Unbekannt', 'Gültig', 'Ungültig'],
+      stackedCategory: ['Gültig', 'Ungültig'],
       data: prefixData
     });
 
