@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-VantagePointMeta = namedtuple('VantagePointMeta', ['vpid', 'rcid', 'timestamp', 'valid', 'invalid', 'unkonwn'])
+VantagePointData = namedtuple('VantagePointData', ['vpid', 'vpaddr', 'rcid', 'timestamp', 'valid', 'unknown', 'invalid'])
 
 RouteCollectorMeta = namedtuple('RouteCollectorMeta', ['rcid', 'timestamp', 'rcloc', 'peers', 'prefix4', 'prefix6'])
 

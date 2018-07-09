@@ -1,18 +1,12 @@
-from datetime import datetime, timezone
+from collections import defaultdict
 from flask import Flask, g, jsonify
 import os
 
 from classes.helper.db_connector import PostgresConnector as DBConnector
 from classes.helper.functions import *
-app = Flask(__name__)
+from classes.helper.dataTuples import VantagePointData
 
-def get_db():
-    """Opens a new database connection if there is none yet for the
-    current application context.
-    """
-    if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = connect_db()
-    return g.sqlite_db
+app = Flask(__name__)
 
 
 @app.route('/')
@@ -49,6 +43,55 @@ def get_rc_data(rcs, timestamp=None):
             "prefix4": rc[3],
             "prefix6": rc[4],
         }
+
+    return jsonify(json_data)
+
+
+@app.route('/vp_data/<rcs>/all/latest')
+@app.route('/vp_data/<rcs>/all/<int:timestamp>')
+@app.route('/vp_data/<rcs>/<vps>/latest')
+@app.route('/vp_data/<rcs>/<vps>/<int:timestamp>')
+def get_vp_data(rcs, vps=None, timestamp=None):
+    db = get_db()
+
+    rc_list = rcs.split(",")
+    vp_list = None
+    if vps:
+        vp_list = vps.split(",")
+
+    timeslot = get_timeslot(timestamp)
+
+    vp_data = db.get_vp_data(rc_list, vp_list, timeslot)
+
+    if not timestamp:
+        timestamp = vp_data[0][3]
+        timeslot = get_timeslot(timestamp)
+
+    vp_set = set()
+
+    data = {}
+    for rc in rc_list:
+        data[rc] = defaultdict(dict)
+
+    for vp in vp_data:
+        cur = VantagePointData._make(vp)
+        as_name = 'AS' + str(cur.vpid)
+        vp_set.add(as_name)
+        data[cur.rcid][as_name][cur.vpaddr] = {
+            "valid": cur.valid,
+            "unknown": cur.unknown,
+            "invalid": cur.invalid
+        }
+
+    # vps = ','.join(list(vp_set))
+    if not vps:
+        vps = 'all'
+
+    json_data = {
+        "query": "/vp_data/{}/{}/{}".format(rcs, vps, timestamp),
+        "timeslot": {"start": timeslot.start, "stop": timeslot.stop},
+        "data": data
+    }
 
     return jsonify(json_data)
 

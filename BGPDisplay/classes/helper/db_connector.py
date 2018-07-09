@@ -72,3 +72,38 @@ class PostgresConnector(object):
         cur.close()
 
         return data
+
+    def get_vp_data(self, rc_list, vp_list=None, timeslot=None):
+        cur = self.conn.cursor()
+
+        data = {'rc_tuple': tuple(rc_list)}
+
+        path_prefix = ''
+
+        if vp_list:
+            data['vp_tuple'] = tuple(vp_list)
+        else:
+            path_prefix = '_all'
+
+        if not timeslot:
+            path_prefix += '_latest'
+
+        else:
+            data['start'] = timeslot.start
+            data['stop'] = timeslot.stop
+
+        dirname = os.path.dirname(__file__)
+        spl_path = os.path.join(dirname, '..', 'sql', 'postgres', 'get{}_vp_data.sql'.format(path_prefix))
+
+
+        with open(spl_path, 'r') as f:
+            statements = f.read().split(';')
+
+            cur.execute(statements[0], data)
+
+        data = cur.fetchall()
+
+        self.conn.commit()
+        cur.close()
+
+        return data

@@ -3,4 +3,5 @@ FROM "VantagePoint_Data"
 WHERE "rcid" IN %(rc_tuple)s
     AND "vpid" IN %(vp_tuple)s
     AND "timestamp" BETWEEN %(start)s AND %(stop)s
-ORDER BY timestamp;
+ORDER BY "vpid", "vpaddr", "rcid", "timestamp";
+
