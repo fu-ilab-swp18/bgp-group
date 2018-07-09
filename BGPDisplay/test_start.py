@@ -1,9 +1,14 @@
-from classes import BGPDataAggregator
+from classes.helper.db_connector import PostgresConnector as DBC
 
-import time
 
-t = time.time()
+db = {
+    'name': 'bgp',
+    'user': 'bgp',
+    'password': 'replica-pilaster-enemy',
+    'host': "pg.a0s.de"
+}
 
-test = BGPDataAggregator()
-print('Elapsed Time:', time.time() - t )
-print(test.metadata_vp['rrc00'])
+print(db)
+dbc = DBC(db)
+
+dbc.update_vp_meta(None)

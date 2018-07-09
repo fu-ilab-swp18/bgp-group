@@ -6,7 +6,7 @@ from classes import BGPLocalAggregator
 
 t = time.time()
 test = BGPLocalAggregator()
-print('Elapsed Time:', time.time() - t )
+print('Elapsed Time:', time.time() - t)
 
 
 pickle.dump(test.metadata_vp, open("test.p", "wb"))

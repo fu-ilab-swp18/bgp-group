@@ -4,7 +4,7 @@ from classes import BGPDataAggregator
 
 @click.command()
 def backend():
-    BGPDataAggregator()
+    aggregator = BGPDataAggregator()
 
 
 @click.command()
