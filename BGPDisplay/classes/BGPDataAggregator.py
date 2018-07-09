@@ -152,7 +152,7 @@ class BGPDataAggregator(object):
                             ] += 1
                             self.metadata_vp[rec.collector][(elem.peer_asn, elem.peer_address)][3] = next_timestamp
 
-                            self.peers[rec.collector][(elem.peer_asn, prefix)] += 1
+                            self.peers[rec.collector][elem.peer_asn] += 1
 
                             if is_v4:
                                 self.prefix4[rec.collector][prefix] += 1
@@ -170,12 +170,12 @@ class BGPDataAggregator(object):
                             else:
                                 self.prefix6[rec.collector][prefix] -= 1
                                 if self.prefix6[rec.collector][prefix] == 0:
-                                    del (self.prefix4[rec.collector][prefix])
+                                    del (self.prefix6[rec.collector][prefix])
 
                             # Reduce number of prefixes belonging to this ASN
-                            self.peers[rec.collector][(elem.peer_asn, prefix)] -= 1
-                            if self.peers[rec.collector][(elem.peer_asn, prefix)] == 0:
-                                del (self.prefix4[rec.collector][prefix])
+                            self.peers[rec.collector][elem.peer_asn] -= 1
+                            if self.peers[rec.collector][elem.peer_asn] == 0:
+                                del (self.peers[rec.collector][elem.peer_asn])
 
                             # Update the metadata valid/unknown/invalid count
                             self.metadata_vp[rec.collector][(elem.peer_asn, elem.peer_address)][
