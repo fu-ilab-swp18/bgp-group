@@ -44,3 +44,31 @@ class PostgresConnector(object):
 
         self.conn.commit()
         cur.close()
+
+    def get_rc_data(self, rc_list, timeslot=None):
+        cur = self.conn.cursor()
+        dirname = os.path.dirname(__file__)
+
+        spl_path = ""
+        data = {'rc_tuple': tuple(rc_list)}
+
+        if not timeslot:
+            spl_path = os.path.join(dirname, '..', 'sql', 'postgres', 'get_latest_rc_data.sql')
+        else:
+            spl_path = os.path.join(dirname, '..', 'sql', 'postgres', 'get_rc_data.sql')
+
+            data = {'rc_tuple': tuple(rc_list),
+                'start': timeslot.start,
+                'stop': timeslot.stop}
+
+        with open(spl_path, 'r') as f:
+            statements = f.read().split(';')
+
+            cur.execute(statements[0], data)
+
+        data = cur.fetchall()
+
+        self.conn.commit()
+        cur.close()
+
+        return data

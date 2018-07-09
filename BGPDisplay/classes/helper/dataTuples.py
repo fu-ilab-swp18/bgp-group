@@ -5,3 +5,5 @@ VantagePointMeta = namedtuple('VantagePointMeta', ['vpid', 'rcid', 'timestamp', 
 RouteCollectorMeta = namedtuple('RouteCollectorMeta', ['rcid', 'timestamp', 'rcloc', 'peers', 'prefix4', 'prefix6'])
 
 Route = namedtuple('RouteTable', ['vpid', 'rcid', 'prefix', 'isIPv4', 'type'])
+
+Timeslot = namedtuple('Timeslot', ['start', 'stop'])

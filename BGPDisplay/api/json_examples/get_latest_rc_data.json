@@ -1,5 +1,5 @@
 {
-    "query": "v1/rc_data/get/rrc01,rrc01/latest",
+    "query": "v1/rc_data/rrc01,rrc01/latest",
     "time": {
         "from": 1531123200,
         "to": 1531123500

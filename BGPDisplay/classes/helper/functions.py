@@ -1,6 +1,8 @@
 import json
 from datetime import datetime, timezone
 
+from .dataTuples import Timeslot
+
 
 def check_ipv4(ip):
     if len(ip) <= 4:
@@ -30,7 +32,7 @@ def get_settings(settings_json):
     return False
 
 
-def get_timestamp_now(slot=0):
+def get_timestamp_now(slot=5):
     dt = datetime.now(timezone.utc)
     for i in range(0, 60, slot):
         if (i) > dt.minute:
@@ -38,6 +40,27 @@ def get_timestamp_now(slot=0):
 
     dt = dt.replace(minute=(i - slot), second=0, microsecond=0)
     return int(dt.timestamp())
+
+def get_timeslot(timestamp=None, slot=5):
+    if not timestamp:
+        return None
+
+    dt = datetime.fromtimestamp(timestamp, timezone.utc)
+
+    for i in range(0, 60, slot):
+        if (i) > dt.minute:
+            break
+
+    dt_start = dt.replace(minute=(i - slot), second=0, microsecond=0)
+    dt_stop = dt.replace(minute=(i), second=0, microsecond=0)
+
+    dt_now = datetime.now(timezone.utc)
+    if dt_now < dt_stop:
+        dt_stop = dt_now
+
+    return Timeslot(int(dt_start.timestamp()), int(dt_stop.timestamp()))
+
+
 
 def init_next_timestamp(start_timestamp, slot=0):
     start_timestamp += 3600  # added 1h to push (1h = 3600s)
