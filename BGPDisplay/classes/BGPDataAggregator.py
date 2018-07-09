@@ -60,6 +60,7 @@ class BGPDataAggregator(object):
             self.mgr.stop()
 
     def push_data(self, timestamp):
+        print("UPDATE:", timestamp)
         self.db.update_vp_meta(self.metadata_vp)
         for rc in self.metadata_rc.keys():
             self.metadata_rc[rc] = RouteCollectorMeta(
@@ -74,7 +75,8 @@ class BGPDataAggregator(object):
     def start_collecting(self, start_timestamp, end_timestamp=0):
         self.stream.add_interval_filter(start_timestamp, end_timestamp)
         print("Start BGPStream:", start_timestamp, end_timestamp)
-        next_timestamp = get_timestamp_now(5)
+        next_timestamp = init_next_timestamp(start_timestamp, 5)
+        print("Next Push to DB at:", next_timestamp)
         self.stream.start()
         rec = BGPRecord()
         while(self.stream.get_next_record(rec)):
@@ -125,17 +127,18 @@ class BGPDataAggregator(object):
                                 We designed the namedtuple the way to represent
                                 that. So valid is a pos 3 and so on.
                                 """
-                                self.metadata_vp[rec.collector][elem.peer_asn][
-                                    3 + old_elem.type
+                                self.metadata_vp[rec.collector][(elem.peer_asn, elem.peer_address)][
+                                    4 + old_elem.type
                                 ] -= 1
-                                self.metadata_vp[rec.collector][elem.peer_asn][
-                                    3 + validated.state.value
+                                self.metadata_vp[rec.collector][(elem.peer_asn, elem.peer_address)][
+                                    4 + validated.state.value
                                 ] += 1
                         else:
                             if not self.metadata_vp[rec.collector].get(elem.peer_asn):
                                 """Init the metadata-entry if it not exists already"""
-                                self.metadata_vp[rec.collector][elem.peer_asn] = [
+                                self.metadata_vp[rec.collector][(elem.peer_asn, elem.peer_address)] = [
                                     elem.peer_asn,
+                                    elem.peer_address,
                                     rec.collector,
                                     next_timestamp,
                                     0,
@@ -144,12 +147,12 @@ class BGPDataAggregator(object):
                                 ]
 
                             # Update the VantagePoint Metadate the same way like above.
-                            self.metadata_vp[rec.collector][elem.peer_asn][
-                                3 + validated.state.value
+                            self.metadata_vp[rec.collector][(elem.peer_asn, elem.peer_address)][
+                                4 + validated.state.value
                             ] += 1
-                            self.metadata_vp[rec.collector][elem.peer_asn][2] = next_timestamp
+                            self.metadata_vp[rec.collector][(elem.peer_asn, elem.peer_address)][3] = next_timestamp
 
-                            self.peers[rec.collector][elem.peer_asn] += 1
+                            self.peers[rec.collector][(elem.peer_asn, prefix)] += 1
 
                             if is_v4:
                                 self.prefix4[rec.collector][prefix] += 1
@@ -170,17 +173,17 @@ class BGPDataAggregator(object):
                                     del (self.prefix4[rec.collector][prefix])
 
                             # Reduce number of prefixes belonging to this ASN
-                            self.peers[rec.collector][elem.peer_asn] -= 1
-                            if self.peers[rec.collector][elem.peer_asn] == 0:
+                            self.peers[rec.collector][(elem.peer_asn, prefix)] -= 1
+                            if self.peers[rec.collector][(elem.peer_asn, prefix)] == 0:
                                 del (self.prefix4[rec.collector][prefix])
 
                             # Update the metadata valid/unknown/invalid count
-                            self.metadata_vp[rec.collector][elem.peer_asn][
-                                3 + old_elem.type
+                            self.metadata_vp[rec.collector][(elem.peer_asn, elem.peer_address)][
+                                4 + old_elem.type
                             ] -= 1
 
                             # Update the metadata timestamp
-                            self.metadata_vp[rec.collector][elem.peer_asn][2] = next_timestamp
+                            self.metadata_vp[rec.collector][(elem.peer_asn, elem.peer_address)][3] = next_timestamp
 
                             # Remove the entry from the route_table
                             self.route_table[rec.collector][

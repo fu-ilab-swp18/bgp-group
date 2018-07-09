@@ -39,6 +39,20 @@ def get_timestamp_now(slot=0):
     dt = dt.replace(minute=(i - slot), second=0, microsecond=0)
     return int(dt.timestamp())
 
+def init_next_timestamp(start_timestamp, slot=0):
+    start_timestamp += 3600  # added 1h to push (1h = 3600s)
+    dt = datetime.now(timezone.utc)
+    for i in range(0, 60, slot):
+        if (i) > dt.minute:
+            break
+
+    dt = dt.replace(minute=(i - slot), second=0, microsecond=0)
+    now_timestamp = int(dt.timestamp())
+    if now_timestamp > start_timestamp:
+        return start_timestamp
+    else:
+        return now_timestamp
+
 
 def split_prefix(prefix):
     """ Transforms a string "127.0.0.1/48" into ('127.0.0.1', 48) """
