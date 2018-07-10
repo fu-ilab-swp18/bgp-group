@@ -5,7 +5,7 @@ var blessed = require('blessed'),
 var screen = blessed.screen();
 var grid = new contrib.grid({rows: 2, cols: 3, screen: screen});
 
-var db = require('./data');
+var apiData = require('./data');
 
 // announced prefixes
 
@@ -64,11 +64,10 @@ function getTimeDifference(timestamp) {
 }
 
 function updateData() {
-  db.getData().then(function (data) {
-
+  apiData.getDataForRC(selectedRC).then(function (data) {
     var times = [];
     var prefixData = [];
-    data.rc[selectedRC].forEach(function (row) {
+    data.rc.snapshots.forEach(function (row) {
       times.push(getTimeDifference(row.timestamp));
       prefixData.push(row.announcedPrefixes);
     });
@@ -84,7 +83,7 @@ function updateData() {
 
     times = [];
     prefixData = [];
-    data.vp[selectedRC].forEach(function (row) {
+    data.vp.snapshots.forEach(function (row) {
       times.push(getTimeDifference(row.timestamp));
       prefixData.push([row.valid, row.invalid]);
     });
@@ -96,18 +95,18 @@ function updateData() {
     });
 
 
-    var rc = data.rc[selectedRC][0];
+    const [stats] = data.rc.snapshots.slice(-1);
 
     statisticsTable.setData({
       headers: [],
       data: [
-        ['ID des Route Collectors:', rc.rcid],
+        ['ID des Route Collectors:', selectedRC],
         ['Standort des RC:', 'DE-CIX Frankfurt'],
-        ['Anzahl Peers:', rc.peers],
-        ['Bekannte Präfixe:', rc.prefix],
-        ['Davon IPv6:', rc.prefix6],
-        ['Davon IPv4:', rc.prefix4],
-        ['Letztes Update:', moment.unix(rc.timestamp).format("DD. MMM YYYY, HH:mm")]
+        ['Anzahl Peers:', stats.peers],
+        ['Bekannte Präfixe:', stats.prefix],
+        ['Davon IPv6:', stats.prefix6],
+        ['Davon IPv4:', stats.prefix4],
+        ['Letztes Update:', moment.unix(stats.timestamp).format("DD. MMM YYYY, HH:mm")]
       ]
     });
 
@@ -117,6 +116,4 @@ function updateData() {
   });
 }
 
-db.init().then(function () {
-  updateData();
-});
+updateData();

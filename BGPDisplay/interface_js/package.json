@@ -7,6 +7,6 @@
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.5",
     "moment": "^2.22.2",
-    "pg": "^7.4.3"
+    "request-promise-native": "^1.0.5"
   }
 }

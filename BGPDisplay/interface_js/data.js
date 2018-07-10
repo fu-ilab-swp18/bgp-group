@@ -1,74 +1,117 @@
-var pg = require('pg');
-var fs = require("fs");
-var path = require("path");
+const api = require('./api');
+const moment = require('moment');
 
-var settings_path = path.join(__dirname, '..', 'settings.json');
-var settings = JSON.parse(fs.readFileSync(settings_path, 'utf-8'));
+const maxInitialSnapshots = 7;
+const snapshotInterval = 300;
 
-var db = settings.db;
-db.password = process.env.PGPASS
+var rcDataCache = {};
 
-var client = new pg.Client({
-  host: db.host,
-  user: db.user,
-  database: db.name,
-  password: db.password
-});
-
-var timestampInterval = 300;
-
-function init() {
-  if (!process.env.PGPASS) {
-    throw new Error('Please set the password for the database first. PGPASS=foo');
-  }
-  return client.connect();
+function getCachedDataForRC(rc) {
+  rcDataCache[rc] = rcDataCache[rc] || {
+    rc: {
+      initialized: false,
+      snapshots: [],
+      lastTimestamp: null
+    },
+    vp: {
+      initialized: false,
+      snapshots: [],
+      lastTimestamp: null
+    }
+  };
+  return rcDataCache[rc];
 }
 
-function getData() {
-  var data = {
-    rc: {},
-    vp: {}
-  };
+function prepareAndPushTimestamp(response, dataCache, processCallback) {
+  var snapshot = response.snapshot;
 
-  return client.query(' \
-      SELECT * \
-      FROM "RouteCollector_Metadata" \
-      ORDER BY timestamp \
-      LIMIT 8 \
-    ')
-    .then(function (res) {
-      res.rows.forEach(function (row) {
-        var rc = data.rc[row.rcid] = data.rc[row.rcid] || [];
-        row.prefix = row.prefix6 + row.prefix4;
-        if (rc.length === 0) {
-          row.announcedPrefixes = 0;
+  if (!snapshot || Object.values(snapshot).length < 1 ||
+    (!dataCache.initialized && dataCache.snapshots.length >= maxInitialSnapshots)) {
+    if (!dataCache.initialized) {
+      dataCache.initialized = true;
+      dataCache.lastTimestamp = moment().unix();
+    }
+    return true;
+  }
+
+  var newSnapshot = { timestamp: response.timeslot.start };
+  processCallback(snapshot, newSnapshot);
+
+  if (dataCache.initialized) {
+    dataCache.snapshots.push(newSnapshot);
+  } else {
+    dataCache.snapshots.unshift(newSnapshot);
+  }
+
+  if (dataCache.initialized) {
+    dataCache.lastTimestamp = response.timeslot.stop;
+  } else {
+    dataCache.lastTimestamp = response.timeslot.start - snapshotInterval;
+  }
+}
+
+function getDataForRCFromLastTimestamp(rc) {
+  const dataCache = getCachedDataForRC(rc).rc;
+
+  return api.getRCData(rc, dataCache.lastTimestamp).then(function (res) {
+
+    const abort = prepareAndPushTimestamp(res, dataCache, function (snapshot, newSnapshot) {
+      newSnapshot.peers = snapshot.peers;
+      newSnapshot.prefix6 = snapshot.prefix6;
+      newSnapshot.prefix4 = snapshot.prefix4;
+      newSnapshot.prefix = snapshot.prefix6 + snapshot.prefix4;
+      newSnapshot.announcedPrefixes = 0;
+      if (dataCache.snapshots.length > 0) {
+        if (dataCache.initialized) {
+          const [lastSnapshot] = dataCache.snapshots.slice(-1);
+          newSnapshot.announcedPrefixes = snapshot.prefix - lastSnapshot.prefix;
         } else {
-          var lastSnapshot = rc[rc.length-1];
-          row.announcedPrefixes = row.prefix - lastSnapshot.prefix;
+          const lastSnapshot = dataCache.snapshots[0];
+          lastSnapshot.announcedPrefixes = lastSnapshot.prefix - newSnapshot.prefix;
         }
-        data.rc[row.rcid].push(row);
-      });
+      }
+    });
 
-      return client.query(` \
-        SELECT rcid, ROUND(timestamp / ${timestampInterval}) * ${timestampInterval} AS timestamp, \
-               SUM(valid) AS valid, SUM(invalid) AS invalid, SUM(unknown) AS unknown \
-        FROM "VantagePoint_Metadata" \
-        GROUP BY rcid, ROUND(timestamp / ${timestampInterval}) \
-        ORDER BY timestamp \
-        LIMIT 7 \
-      `);
-    })
+    if (abort) {
+      return;
+    }
 
-    .then(function (res) {
-      res.rows.forEach(function (row) {
-        data.vp[row.rcid] = data.vp[row.rcid] || [];
-        row.valid = parseInt(row.valid);
-        row.invalid = parseInt(row.invalid);
-        row.unknown = parseInt(row.unknown);
-        data.vp[row.rcid].push(row);
-      });
+    return getDataForRCFromLastTimestamp(rc);
+  });
+}
 
-      return data;
+function getDataForVPFromLastTimestamp(rc) {
+  const dataCache = getCachedDataForRC(rc).vp;
+
+  return api.getVPData(rc, null, dataCache.lastTimestamp).then(function (res) {
+
+    const abort = prepareAndPushTimestamp(res, dataCache, function (snapshot, newSnapshot) {
+      newSnapshot.valid = 0;
+      newSnapshot.invalid = 0;
+      newSnapshot.unknown = 0;
+
+      for (const prefixes of Object.values(snapshot)) {
+        for (const stats of Object.values(prefixes)) {
+          newSnapshot.valid += stats.valid;
+          newSnapshot.invalid += stats.invalid;
+          newSnapshot.unknown += stats.unknown;
+        }
+      }
+    });
+
+    if (abort) {
+      return;
+    }
+
+    return getDataForVPFromLastTimestamp(rc);
+  });
+}
+
+function getDataForRC(rc) {
+  return getDataForRCFromLastTimestamp(rc)
+    .then(getDataForVPFromLastTimestamp(rc))
+    .then(function () {
+      return getCachedDataForRC(rc);
     })
 
     .catch(function (err) {
@@ -77,6 +120,5 @@ function getData() {
 }
 
 module.exports = {
-  init: init,
-  getData: getData
+  getDataForRC: getDataForRC
 };

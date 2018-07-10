@@ -87,10 +87,6 @@ bresenham@0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/bresenham/-/bresenham-0.0.3.tgz#abdab9e5b194e27c757cd314d8444314f299877a"
 
-buffer-writer@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/buffer-writer/-/buffer-writer-1.0.1.tgz#22a936901e3029afcd7547eb4487ceb697a3bf08"
-
 buffers@~0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/buffers/-/buffers-0.1.1.tgz#b24579c3bed4d6d396aeee6d9a8ae7f5482ab7bb"
@@ -308,7 +304,7 @@ lodash.toarray@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.toarray/-/lodash.toarray-4.4.0.tgz#24c4bfcd6b2fba38bfd0594db1179d8e9b656561"
 
-lodash@>=3.0.0:
+lodash@>=3.0.0, lodash@^4.13.1:
   version "4.17.10"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.10.tgz#1b7793cf7259ea38fb3661d4d38b3260af8ae4e7"
 
@@ -385,48 +381,9 @@ optimist@~0.3.4:
   dependencies:
     wordwrap "~0.0.2"
 
-packet-reader@0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/packet-reader/-/packet-reader-0.3.1.tgz#cd62e60af8d7fea8a705ec4ff990871c46871f27"
-
 performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
-
-pg-connection-string@0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/pg-connection-string/-/pg-connection-string-0.1.3.tgz#da1847b20940e42ee1492beaf65d49d91b245df7"
-
-pg-pool@~2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/pg-pool/-/pg-pool-2.0.3.tgz#c022032c8949f312a4f91fb6409ce04076be3257"
-
-pg-types@~1.12.1:
-  version "1.12.1"
-  resolved "https://registry.yarnpkg.com/pg-types/-/pg-types-1.12.1.tgz#d64087e3903b58ffaad279e7595c52208a14c3d2"
-  dependencies:
-    postgres-array "~1.0.0"
-    postgres-bytea "~1.0.0"
-    postgres-date "~1.0.0"
-    postgres-interval "^1.1.0"
-
-pg@^7.4.3:
-  version "7.4.3"
-  resolved "https://registry.yarnpkg.com/pg/-/pg-7.4.3.tgz#f7b6f93f5340ecc2596afbb94a13e3d6b609834b"
-  dependencies:
-    buffer-writer "1.0.1"
-    packet-reader "0.3.1"
-    pg-connection-string "0.1.3"
-    pg-pool "~2.0.3"
-    pg-types "~1.12.1"
-    pgpass "1.x"
-    semver "4.3.2"
-
-pgpass@1.x:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/pgpass/-/pgpass-1.0.2.tgz#2a7bb41b6065b67907e91da1b07c1847c877b306"
-  dependencies:
-    split "^1.0.0"
 
 picture-tube@0.0.4:
   version "0.0.4"
@@ -444,23 +401,9 @@ png-js@~0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/png-js/-/png-js-0.1.1.tgz#1cc7c212303acabe74263ec3ac78009580242d93"
 
-postgres-array@~1.0.0:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/postgres-array/-/postgres-array-1.0.2.tgz#8e0b32eb03bf77a5c0a7851e0441c169a256a238"
-
-postgres-bytea@~1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/postgres-bytea/-/postgres-bytea-1.0.0.tgz#027b533c0aa890e26d172d47cf9ccecc521acd35"
-
-postgres-date@~1.0.0:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/postgres-date/-/postgres-date-1.0.3.tgz#e2d89702efdb258ff9d9cee0fe91bd06975257a8"
-
-postgres-interval@^1.1.0:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/postgres-interval/-/postgres-interval-1.1.1.tgz#acdb0f897b4b1c6e496d9d4e0a853e1c428f06f0"
-  dependencies:
-    xtend "^4.0.0"
+psl@^1.1.24:
+  version "1.1.28"
+  resolved "https://registry.yarnpkg.com/psl/-/psl-1.1.28.tgz#4fb6ceb08a1e2214d4fd4de0ca22dae13740bc7b"
 
 punycode@^1.4.1:
   version "1.4.1"
@@ -484,6 +427,20 @@ redeyed@~1.0.0:
   resolved "https://registry.yarnpkg.com/redeyed/-/redeyed-1.0.1.tgz#e96c193b40c0816b00aec842698e61185e55498a"
   dependencies:
     esprima "~3.0.0"
+
+request-promise-core@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/request-promise-core/-/request-promise-core-1.1.1.tgz#3eee00b2c5aa83239cfb04c5700da36f81cd08b6"
+  dependencies:
+    lodash "^4.13.1"
+
+request-promise-native@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/request-promise-native/-/request-promise-native-1.0.5.tgz#5281770f68e0c9719e5163fd3fab482215f4fda5"
+  dependencies:
+    request-promise-core "1.1.1"
+    stealthy-require "^1.1.0"
+    tough-cookie ">=2.3.3"
 
 request@^2.53.0:
   version "2.87.0"
@@ -526,22 +483,12 @@ sax@>=0.6.0:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semver@4.3.2:
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-4.3.2.tgz#c7a07158a80bedd052355b770d82d6640f803be7"
-
 sparkline@^0.1.1:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/sparkline/-/sparkline-0.1.2.tgz#c3bde46252b1354e710c4b200d54816bd9f07a32"
   dependencies:
     here "0.0.2"
     nopt "~2.1.2"
-
-split@^1.0.0:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/split/-/split-1.0.1.tgz#605bd9be303aa59fb35f9229fbea0ddec9ea07d9"
-  dependencies:
-    through "2"
 
 sshpk@^1.7.0:
   version "1.14.2"
@@ -557,6 +504,10 @@ sshpk@^1.7.0:
     ecc-jsbn "~0.1.1"
     jsbn "~0.1.0"
     tweetnacl "~0.14.0"
+
+stealthy-require@^1.1.0:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/stealthy-require/-/stealthy-require-1.1.1.tgz#35b09875b4ff49f26a777e509b3090a3226bf24b"
 
 string_decoder@~0.10.x:
   version "0.10.31"
@@ -576,9 +527,12 @@ term-canvas@0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/term-canvas/-/term-canvas-0.0.5.tgz#597afac2fa6369a6f17860bce9c5f66d6ea0ca96"
 
-through@2:
-  version "2.3.8"
-  resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
+tough-cookie@>=2.3.3:
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-2.4.3.tgz#53f36da3f47783b0925afa06ff9f3b165280f781"
+  dependencies:
+    psl "^1.1.24"
+    punycode "^1.4.1"
 
 tough-cookie@~2.3.3:
   version "2.3.4"
@@ -626,7 +580,3 @@ xml2js@^0.4.5:
 xmlbuilder@~9.0.1:
   version "9.0.7"
   resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-9.0.7.tgz#132ee63d2ec5565c557e20f4c22df9aca686b10d"
-
-xtend@^4.0.0:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/xtend/-/xtend-4.0.1.tgz#a5c6d532be656e23db820efb943a1f04998d63af"
