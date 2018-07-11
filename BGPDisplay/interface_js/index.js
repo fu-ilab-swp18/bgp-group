@@ -4,7 +4,7 @@ var blessed = require('blessed'),
     numeral = require('numeral');
 
 var screen = blessed.screen();
-var grid = new contrib.grid({rows: 2, cols: 3, screen: screen});
+var grid = new contrib.grid({rows: 9, cols: 3, screen: screen});
 
 var apiData = require('./data');
 
@@ -20,7 +20,7 @@ numeral.locale('de');
 
 // announced prefixes
 
-var prefixesChart = grid.set(0, 0, 1, 2, contrib.line, {
+var prefixesChart = grid.set(0, 0, 4, 2, contrib.line, {
   label: 'Neu annoncierte Präfixe',
   style: {
     line: 'yellow',
@@ -35,7 +35,7 @@ var prefixesChart = grid.set(0, 0, 1, 2, contrib.line, {
 
 // validated prefixes
 
-var validatedPrefixesChart = grid.set(1, 0, 1, 2, contrib.stackedBar, {
+var validatedPrefixesChart = grid.set(4, 0, 4, 2, contrib.stackedBar, {
   label: 'RPKI-validierte Präfixe (in Prozent)',
   barWidth: 4,
   barSpacing: 15,
@@ -47,14 +47,14 @@ var validatedPrefixesChart = grid.set(1, 0, 1, 2, contrib.stackedBar, {
 
 // information
 
-var informationBox = grid.set(0, 2, 1, 1, blessed.box, {
+var informationBox = grid.set(0, 2, 4, 1, blessed.box, {
   label: 'Allgemeines',
   padding: 1
 });
 
 // statistics
 
-var statisticsTable = grid.set(1, 2, 1, 1, contrib.table, {
+var statisticsTable = grid.set(4, 2, 4, 1, contrib.table, {
   label: 'Statistik und Informationen',
   interactive: false,
   fg: 'white',
@@ -63,6 +63,35 @@ var statisticsTable = grid.set(1, 2, 1, 1, contrib.table, {
   border: {type: "line", fg: "cyan"},
   columnSpacing: 5, //in chars
   columnWidth: [25, 25], /*in chars*/
+});
+
+// RC selector
+
+var rcSelector = grid.set(8, 0, 1, 3, blessed.listbar, {
+  label: 'Perspektive des folgenden Route Collectors anzeigen',
+  commands: {
+    'RC001': {
+      callback: function () {}
+    },
+    'RC002': {
+      callback: function () {}
+    },
+    'RC003': {
+      callback: function () {}
+    }
+  },
+  autoCommandKeys: true,
+  style: {
+    selected: {
+      fg: 'white',
+      bg: 'magenta',
+    }
+  }
+});
+
+// Quit on Escape, q, or Control-C.
+screen.key(['escape', 'q', 'C-c'], function() {
+  return process.exit(0);
 });
 
 screen.render();
