@@ -2,4 +2,4 @@ SELECT DISTINCT ON("vpid", "vpaddr", "rcid") "vpid", "vpaddr", "rcid", "timestam
 FROM "VantagePoint_Data"
 WHERE "rcid" IN %(rc_tuple)s
     AND "vpid" IN %(vp_tuple)s
-ORDER BY "vpid", "vpaddr", "rcid", "timestamp";
+ORDER BY "vpid", "vpaddr", "rcid", "timestamp" DESC;
