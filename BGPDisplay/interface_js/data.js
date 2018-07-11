@@ -97,6 +97,10 @@ function getDataForVPFromLastTimestamp(rc) {
           newSnapshot.unknown += stats.unknown;
         }
       }
+
+      const validated = newSnapshot.valid + newSnapshot.invalid;
+      newSnapshot.validRatio = newSnapshot.valid / validated * 100;
+      newSnapshot.invalidRatio = newSnapshot.invalid / validated * 100;
     });
 
     if (abort) {
