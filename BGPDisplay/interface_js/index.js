@@ -85,7 +85,9 @@ function updateData() {
     prefixData = [];
     data.vp.snapshots.forEach(function (row) {
       times.push(getTimeDifference(row.timestamp));
-      prefixData.push([row.valid, row.invalid]);
+      prefixData.push([
+        Math.round(row.validRatio), Math.round(row.invalidRatio)
+      ]);
     });
 
     validatedPrefixesChart.setData({
