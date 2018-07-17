@@ -103,19 +103,22 @@ screen.render();
 var selectedRC = 'rrc00';
 var updateTimer;
 
-function getTimeDifference(timestamp) {
-  return moment.unix(timestamp).fromNow();
+function getFormattedTime(timestamp) {
+  return moment.unix(timestamp).format('LT');
 }
 
 function updateData() {
   apiData.getDataForRC(selectedRC).then(function (data) {
     var times = [];
     var prefixData = [];
+    var minY = 0;
     data.rc.snapshots.forEach(function (row) {
-      times.push(getTimeDifference(row.timestamp));
+      times.push(getFormattedTime(row.timestamp));
       prefixData.push(row.announcedPrefixes);
+      minY = Math.min(minY, row.announcedPrefixes);
     });
 
+    prefixesChart.options.minY = minY;
     prefixesChart.setData([
       {
         title: '',
@@ -128,7 +131,7 @@ function updateData() {
     times = [];
     prefixData = [];
     data.vp.snapshots.forEach(function (row) {
-      times.push(getTimeDifference(row.timestamp));
+      times.push(getFormattedTime(row.timestamp));
       prefixData.push([
         Math.round(row.validRatio), Math.round(row.invalidRatio)
       ]);
@@ -147,7 +150,6 @@ function updateData() {
       headers: [],
       data: [
         ['ID des Route Collectors:', selectedRC],
-        ['Standort des RC:', 'DE-CIX Frankfurt'],
         ['Anzahl Peers:', numeral(stats.peers).format()],
         ['Bekannte Präfixe:', numeral(stats.prefix).format()],
         ['Davon IPv6:', numeral(stats.prefix6).format()],
