@@ -1,12 +1,12 @@
-var blessed = require('blessed'),
-    contrib = require('blessed-contrib'),
-    moment = require('moment'),
-    numeral = require('numeral');
+const blessed = require('blessed'),
+      contrib = require('blessed-contrib'),
+      moment = require('moment'),
+      numeral = require('numeral');
 
-var screen = blessed.screen();
-var grid = new contrib.grid({rows: 9, cols: 3, screen: screen});
+const screen = blessed.screen();
+const grid = new contrib.grid({rows: 9, cols: 3, screen: screen});
 
-var apiData = require('./data');
+const apiData = require('./data');
 
 moment.locale('de');
 
@@ -20,7 +20,7 @@ numeral.locale('de');
 
 // announced prefixes
 
-var prefixesChart = grid.set(0, 0, 4, 2, contrib.line, {
+const prefixesChart = grid.set(0, 0, 4, 2, contrib.line, {
   label: 'Neu annoncierte Präfixe',
   style: {
     line: 'yellow',
@@ -35,7 +35,7 @@ var prefixesChart = grid.set(0, 0, 4, 2, contrib.line, {
 
 // validated prefixes
 
-var validatedPrefixesChart = grid.set(4, 0, 4, 2, contrib.stackedBar, {
+const validatedPrefixesChart = grid.set(4, 0, 4, 2, contrib.stackedBar, {
   label: 'RPKI-validierte Präfixe (in Prozent)',
   barWidth: 4,
   barSpacing: 15,
@@ -47,14 +47,14 @@ var validatedPrefixesChart = grid.set(4, 0, 4, 2, contrib.stackedBar, {
 
 // information
 
-var informationBox = grid.set(0, 2, 4, 1, blessed.box, {
+const informationBox = grid.set(0, 2, 4, 1, blessed.box, {
   label: 'Allgemeines',
   padding: 1
 });
 
 // statistics
 
-var statisticsTable = grid.set(4, 2, 4, 1, contrib.table, {
+const statisticsTable = grid.set(4, 2, 4, 1, contrib.table, {
   label: 'Statistik und Informationen',
   interactive: false,
   fg: 'white',
@@ -67,19 +67,22 @@ var statisticsTable = grid.set(4, 2, 4, 1, contrib.table, {
 
 // RC selector
 
-var rcSelector = grid.set(8, 0, 1, 3, blessed.listbar, {
-  label: 'Perspektive des folgenden Route Collectors anzeigen',
-  commands: {
-    'RC001': {
-      callback: function () {}
-    },
-    'RC002': {
-      callback: function () {}
-    },
-    'RC003': {
-      callback: function () {}
+const maxRCNumber = process.env.MAX_RC_NUMBER || 0;
+const selectorCommands = {};
+
+for (var i = 0; i <= maxRCNumber; i++) {
+  const rrcId = 'rrc' + (i < 10 ? '0' : '') + i;
+  selectorCommands[rrcId] = {
+    callback: function () {
+      selectedRC = rrcId;
+      updateData();
     }
-  },
+  }
+}
+
+const rcSelector = grid.set(8, 0, 1, 3, blessed.listbar, {
+  label: 'Perspektive des folgenden Route Collectors anzeigen',
+  commands: selectorCommands,
   autoCommandKeys: true,
   style: {
     selected: {
@@ -98,6 +101,7 @@ screen.render();
 
 
 var selectedRC = 'rrc00';
+var updateTimer;
 
 function getTimeDifference(timestamp) {
   return moment.unix(timestamp).fromNow();
@@ -154,7 +158,8 @@ function updateData() {
 
     screen.render();
 
-    setTimeout(updateData, 300000);
+    clearTimeout(updateTimer);
+    updateTimer = setTimeout(updateData, 300000);
   });
 }
 
