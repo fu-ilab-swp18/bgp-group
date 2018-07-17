@@ -4,7 +4,7 @@ from classes.helper.db_connector import PostgresConnector as DBC
 db = {
     'name': 'bgp',
     'user': 'bgp',
-    'password': 'replica-pilaster-enemy',
+    'password': '',
     'host': "pg.a0s.de"
 }
 
