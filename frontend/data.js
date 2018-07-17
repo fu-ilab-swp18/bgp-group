@@ -22,6 +22,12 @@ function getCachedDataForRC(rc) {
   return rcDataCache[rc];
 }
 
+function setValidationRatio(data) {
+  const validated = data.valid + data.invalid;
+  data.validRatio = data.valid / validated * 100;
+  data.invalidRatio = data.invalid / validated * 100;
+}
+
 function prepareAndPushTimestamp(response, dataCache, processCallback) {
   var snapshot = response.snapshot;
 
@@ -86,21 +92,26 @@ function getDataForVPFromLastTimestamp(rc) {
   return api.getVPData(rc, null, dataCache.lastTimestamp).then(function (res) {
 
     const abort = prepareAndPushTimestamp(res, dataCache, function (snapshot, newSnapshot) {
-      newSnapshot.valid = 0;
-      newSnapshot.invalid = 0;
-      newSnapshot.unknown = 0;
+      newSnapshot.all = {
+        valid: 0,
+        invalid: 0,
+        unknown: 0
+      }
 
-      for (const prefixes of Object.values(snapshot)) {
-        for (const stats of Object.values(prefixes)) {
-          newSnapshot.valid += stats.valid;
-          newSnapshot.invalid += stats.invalid;
-          newSnapshot.unknown += stats.unknown;
+      for (const as in snapshot) {
+        const prefixes = snapshot[as];
+        for (const prefix in prefixes) {
+          const stats = prefixes[prefix];
+          setValidationRatio(stats);
+          newSnapshot[`${as} ${prefix}`] = stats;
+
+          newSnapshot.all.valid += stats.valid;
+          newSnapshot.all.invalid += stats.invalid;
+          newSnapshot.all.unknown += stats.unknown;
         }
       }
 
-      const validated = newSnapshot.valid + newSnapshot.invalid;
-      newSnapshot.validRatio = newSnapshot.valid / validated * 100;
-      newSnapshot.invalidRatio = newSnapshot.invalid / validated * 100;
+      setValidationRatio(newSnapshot.all);
     });
 
     if (abort) {

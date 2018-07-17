@@ -101,6 +101,7 @@ screen.render();
 
 
 var selectedRC = 'rrc00';
+var selectedVP;
 var updateTimer;
 
 function getFormattedTime(timestamp) {
@@ -132,8 +133,9 @@ function updateData() {
     prefixData = [];
     data.vp.snapshots.forEach(function (row) {
       times.push(getFormattedTime(row.timestamp));
+      const data = row[selectedVP || 'all'];
       prefixData.push([
-        Math.round(row.validRatio), Math.round(row.invalidRatio)
+        Math.round(data.validRatio), Math.round(data.invalidRatio)
       ]);
     });
 
