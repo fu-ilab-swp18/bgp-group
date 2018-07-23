@@ -77,7 +77,13 @@ for (var i = 0; i <= maxRCNumber; i++) {
       selectedRC = rrcId;
       updateData();
     }
-  }
+  };
+  selectorCommands['Nach Vantage Point filtern'] = {
+    callback: function () {
+      vpSelector.show();
+      vpSelector.focus();
+    }
+  };
 }
 
 const rcSelector = grid.set(8, 0, 1, 3, blessed.listbar, {
@@ -92,16 +98,50 @@ const rcSelector = grid.set(8, 0, 1, 3, blessed.listbar, {
   }
 });
 
-// Quit on Escape, q, or Control-C.
-screen.key(['escape', 'q', 'C-c'], function() {
-  return process.exit(0);
+// VP selector
+
+const vpSelector = blessed.list({
+  parent: screen,
+  hidden: true,
+  label: 'Vantage Point auswählen',
+  tags: true,
+  top: 'center',
+  left: 'center',
+  width: '30%',
+  height: '70%',
+  border: 'line',
+  shadow: true,
+  keys: true,
+  style: {
+    selected: {
+      fg: 'white',
+      bg: 'magenta',
+    }
+  }
+});
+
+vpSelector.on('select', function (_, vpIndex) {
+  vpSelector.hide();
+  selectedVPIndex = vpIndex;
+  updateData();
+})
+
+vpSelector.key(['escape'], function () {
+  vpSelector.hide();
+  screen.render();
+});
+
+screen.key(['escape', 'q', 'C-c'], function (_, key) {
+  if (key.name !== 'escape' || !vpSelector.focused) {
+    return process.exit(0);
+  }
 });
 
 screen.render();
 
 
 var selectedRC = 'rrc00';
-var selectedVP;
+var selectedVPIndex;
 var updateTimer;
 
 function getFormattedTime(timestamp) {
@@ -131,9 +171,14 @@ function updateData() {
 
     times = [];
     prefixData = [];
+    var vpData;
     data.vp.snapshots.forEach(function (row) {
       times.push(getFormattedTime(row.timestamp));
-      const data = row[selectedVP || 'all'];
+      var data = row.accumulated;
+      if (selectedVPIndex) {
+        vpData = row.vps[Object.keys(row.vps)[selectedVPIndex]];
+        data = vpData.stats;
+      }
       prefixData.push([
         Math.round(data.validRatio), Math.round(data.invalidRatio)
       ]);
@@ -147,18 +192,38 @@ function updateData() {
 
 
     const [stats] = data.rc.snapshots.slice(-1);
+    var rows = [
+      [`{bold}Daten für ${selectedRC}`],
+      ['Anzahl Peers:', numeral(stats.peers).format()],
+      ['Bekannte Präfixe:', numeral(stats.prefix).format()],
+      ['Davon IPv6:', numeral(stats.prefix6).format()],
+      ['Davon IPv4:', numeral(stats.prefix4).format()]
+    ];
+
+    if (selectedVPIndex) {
+      rows.push(['']);
+      rows.push([`{bold}Daten für ${vpData.as}: ${vpData.address}`]);
+      rows.push(['Gültige Präfixe:', numeral(vpData.stats.valid).format()]);
+      rows.push(['Ungültige Präfixe:', numeral(vpData.stats.invalid).format()]);
+      rows.push(['Nicht validierte Präfixe:', numeral(vpData.stats.unknown).format()]);
+    }
+
+    rows.push(['']);
+    rows.push(['Letztes Update:', moment.unix(stats.timestamp).format('DD. MMM YYYY, HH:mm')]);
 
     statisticsTable.setData({
       headers: [],
-      data: [
-        ['ID des Route Collectors:', selectedRC],
-        ['Anzahl Peers:', numeral(stats.peers).format()],
-        ['Bekannte Präfixe:', numeral(stats.prefix).format()],
-        ['Davon IPv6:', numeral(stats.prefix6).format()],
-        ['Davon IPv4:', numeral(stats.prefix4).format()],
-        ['Letztes Update:', moment.unix(stats.timestamp).format("DD. MMM YYYY, HH:mm")]
-      ]
+      data: rows
     });
+
+
+    const [snapshot] = data.vp.snapshots.slice(-1);
+    vpSelector.clearItems();
+    for (const vpId in snapshot.vps) {
+      const vp = snapshot.vps[vpId];
+      vpSelector.addItem(`{bold}${vp.as}{/bold}: ${vp.address}`);
+    }
+
 
     screen.render();
 

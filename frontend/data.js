@@ -92,26 +92,31 @@ function getDataForVPFromLastTimestamp(rc) {
   return api.getVPData(rc, null, dataCache.lastTimestamp).then(function (res) {
 
     const abort = prepareAndPushTimestamp(res, dataCache, function (snapshot, newSnapshot) {
-      newSnapshot.all = {
+      newSnapshot.accumulated = {
         valid: 0,
         invalid: 0,
         unknown: 0
       }
+      newSnapshot.vps = {};
 
       for (const as in snapshot) {
-        const prefixes = snapshot[as];
-        for (const prefix in prefixes) {
-          const stats = prefixes[prefix];
+        const addresses = snapshot[as];
+        for (const address in addresses) {
+          const stats = addresses[address];
           setValidationRatio(stats);
-          newSnapshot[`${as} ${prefix}`] = stats;
+          newSnapshot.vps[`${as}:${address}`] = {
+            as: as,
+            address: address,
+            stats: stats
+          }
 
-          newSnapshot.all.valid += stats.valid;
-          newSnapshot.all.invalid += stats.invalid;
-          newSnapshot.all.unknown += stats.unknown;
+          newSnapshot.accumulated.valid += stats.valid;
+          newSnapshot.accumulated.invalid += stats.invalid;
+          newSnapshot.accumulated.unknown += stats.unknown;
         }
       }
 
-      setValidationRatio(newSnapshot.all);
+      setValidationRatio(newSnapshot.accumulated);
     });
 
     if (abort) {
