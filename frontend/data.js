@@ -99,7 +99,14 @@ function getDataForVPFromLastTimestamp(rc) {
       }
       newSnapshot.vps = {};
 
-      for (const as in snapshot) {
+      var ass = Object.keys(snapshot).map(function (as) {
+        return parseInt(as.substr(2));
+      }).sort(function (a, b) {
+        return a - b;
+      });
+
+      ass.forEach(function (as) {
+        as = `AS${as}`;
         const addresses = snapshot[as];
         for (const address in addresses) {
           const stats = addresses[address];
@@ -114,7 +121,7 @@ function getDataForVPFromLastTimestamp(rc) {
           newSnapshot.accumulated.invalid += stats.invalid;
           newSnapshot.accumulated.unknown += stats.unknown;
         }
-      }
+      });
 
       setValidationRatio(newSnapshot.accumulated);
     });

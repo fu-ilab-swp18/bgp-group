@@ -8,6 +8,9 @@ const grid = new contrib.grid({rows: 9, cols: 3, screen: screen});
 
 const apiData = require('./data');
 
+const highlightBgColor = 'magenta';
+const highlightFgColor = 'white';
+
 moment.locale('de');
 
 numeral.register('locale', 'de', {
@@ -22,13 +25,15 @@ numeral.locale('de');
 
 const prefixesChart = grid.set(0, 0, 4, 2, contrib.line, {
   label: 'Neu annoncierte Präfixe',
+  xPadding: 10,
+  yPadding: 15,
   style: {
-    line: 'yellow',
-    text: 'white',
-    baseline: 'black'
+    line: highlightBgColor,
+    text: highlightFgColor,
+    baseline: 'yellow'
   },
-  xLabelPadding: 3,
-  xPadding: 5,
+  xLabelPadding: 5,
+  yLabelPadding: 5,
   showLegend: true,
   wholeNumbersOnly: false
 });
@@ -37,11 +42,11 @@ const prefixesChart = grid.set(0, 0, 4, 2, contrib.line, {
 
 const validatedPrefixesChart = grid.set(4, 0, 4, 2, contrib.stackedBar, {
   label: 'RPKI-validierte Präfixe (in Prozent)',
-  barWidth: 4,
+  xPadding: 10,
+  yPadding: 15,
+  barWidth: 6,
   barSpacing: 15,
-  xOffset: 0,
-  // height: "40%",
-  // width: "100%",
+  xOffset: 5,
   barBgColor: ['green', 'red']
 });
 
@@ -49,7 +54,8 @@ const validatedPrefixesChart = grid.set(4, 0, 4, 2, contrib.stackedBar, {
 
 const informationBox = grid.set(0, 2, 4, 1, blessed.box, {
   label: 'Allgemeines',
-  padding: 1
+  padding: 2,
+  tags: true
 });
 
 // statistics
@@ -60,7 +66,6 @@ const statisticsTable = grid.set(4, 2, 4, 1, contrib.table, {
   fg: 'white',
   width: '100%',
   height: '100%',
-  border: {type: "line", fg: "cyan"},
   columnSpacing: 5, //in chars
   columnWidth: [25, 25], /*in chars*/
 });
@@ -92,15 +97,15 @@ const rcSelector = grid.set(8, 0, 1, 3, blessed.listbar, {
   autoCommandKeys: true,
   style: {
     selected: {
-      fg: 'white',
-      bg: 'magenta',
+      fg: highlightFgColor,
+      bg: highlightBgColor,
     }
   }
 });
 
 // VP selector
 
-const vpSelector = blessed.list({
+const vpSelector = contrib.table({
   parent: screen,
   hidden: true,
   label: 'Vantage Point auswählen',
@@ -109,15 +114,16 @@ const vpSelector = blessed.list({
   left: 'center',
   width: '30%',
   height: '70%',
-  border: 'line',
+  columnWidth: [10, 45],
+  border: {
+    type: 'line',
+    fg: 'yellow'
+  },
   shadow: true,
+  fg: 'white',
   keys: true,
-  style: {
-    selected: {
-      fg: 'white',
-      bg: 'magenta',
-    }
-  }
+  selectedFg: highlightFgColor,
+  selectedBg: highlightBgColor
 });
 
 vpSelector.on('select', function (_, vpIndex) {
@@ -202,7 +208,7 @@ function updateData() {
 
     if (selectedVPIndex) {
       rows.push(['']);
-      rows.push([`{bold}Daten für ${vpData.as}: ${vpData.address}`]);
+      rows.push([`{bold}Daten für ${vpData.as}{/bold}`, vpData.address]);
       rows.push(['Gültige Präfixe:', numeral(vpData.stats.valid).format()]);
       rows.push(['Ungültige Präfixe:', numeral(vpData.stats.invalid).format()]);
       rows.push(['Nicht validierte Präfixe:', numeral(vpData.stats.unknown).format()]);
@@ -218,11 +224,15 @@ function updateData() {
 
 
     const [snapshot] = data.vp.snapshots.slice(-1);
-    vpSelector.clearItems();
+    const vpSelectorData = {
+      headers: ['AS-Nummer', 'IP-Adresse des Routers'],
+      data: []
+    };
     for (const vpId in snapshot.vps) {
       const vp = snapshot.vps[vpId];
-      vpSelector.addItem(`{bold}${vp.as}{/bold}: ${vp.address}`);
+      vpSelectorData.data.push([vp.as, vp.address]);
     }
+    vpSelector.setData(vpSelectorData);
 
 
     screen.render();
@@ -233,11 +243,15 @@ function updateData() {
 }
 
 var currentInformationSlide = 0;
-const informationSlides = [
-  'Was ist BGP?\nDas Border Gateway Protocol (BGP) ist das im Internet eingesetzte Routingprotokoll und verbindet autonome Systeme (AS) miteinander. Diese autonomen Systeme werden in der Regel von Internetdienstanbietern gebildet. BGP wird allgemein als Exterior-Gateway-Protokoll (EGP) und Pfadvektorprotokoll bezeichnet und verwendet für Routing-Entscheidungen sowohl strategische wie auch technisch-metrische Kriterien, wobei in der Praxis meist betriebswirtschaftliche Aspekte berücksichtigt werden.',
-  'Was ist RPKI?\nResource Public Key Infrastructure (RPKI), also known as Resource Certification, is a specialized public key infrastructure (PKI) framework designed to secure the Internet\'s routing infrastructure.',
-  'Was ist ein AS?\nEin autonomes System (AS) ist laut klassischer Definition eine Menge von Routern (die mehrere Netzwerke verbinden) mit einem gemeinsamen inneren Gateway-Protokoll (IGP) und gemeinsamen Metriken, die bestimmen, wie Pakete innerhalb eines AS vermittelt werden, unter einer einzigen technischen Verwaltung.'
-];
+const informationSlides = [];
+
+function addInformationSlide(title, content) {
+  informationSlides.push(`{center}{bold}{${highlightBgColor}-fg}${title}{/${highlightBgColor}-fg}{/bold}{/center}\n\n${content}`);
+}
+
+addInformationSlide('Was ist BGP?', 'Das {bold}Border Gateway Protocol (BGP){/bold} ist das im Internet eingesetzte Routingprotokoll und verbindet autonome Systeme (AS) miteinander. Diese autonomen Systeme werden in der Regel von Internetdienstanbietern gebildet. BGP wird allgemein als Exterior-Gateway-Protokoll (EGP) und Pfadvektorprotokoll bezeichnet und verwendet für Routing-Entscheidungen sowohl strategische wie auch technisch-metrische Kriterien, wobei in der Praxis meist betriebswirtschaftliche Aspekte berücksichtigt werden.');
+addInformationSlide('Was ist RPKI?', 'Die {bold}Resource Public Key Infrastructure (RPKI){/bold}, auch bekannt als Resource Certification, ist ein spezialisiertes Public-Key-Framework, das zur Absicherung der Internet-Routing-Infrastruktur eingesetzt wird. Es prüft und beglaubigt die Authentizität von annoncierten Präfixen. Diese Ergebnisse werden von zentralen Cache-Servern für Router bereitgestellt.');
+addInformationSlide('Was ist ein AS?', 'Ein autonomes System (AS) ist laut klassischer Definition eine Menge von Routern (die mehrere Netzwerke verbinden) mit einem gemeinsamen inneren Gateway-Protokoll (IGP) und gemeinsamen Metriken, die bestimmen, wie Pakete innerhalb eines AS vermittelt werden, unter einer einzigen technischen Verwaltung.');
 
 function updateInformationBox() {
   informationBox.setContent(informationSlides[currentInformationSlide]);
