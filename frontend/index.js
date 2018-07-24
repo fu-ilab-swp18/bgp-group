@@ -81,34 +81,50 @@ const statisticsTableVP = grid.set(6, 2, 2, 1, contrib.table, {
 
 // RC selector
 
-const maxRCNumber = process.env.MAX_RC_NUMBER || 0;
-const selectorCommands = {};
+const maxRCNumber = parseInt(process.env.MAX_RC_NUMBER) || 0;
+const selectorCommands = [];
 
 for (var i = 0; i <= maxRCNumber; i++) {
   const rrcId = 'rrc' + (i < 10 ? '0' : '') + i;
-  selectorCommands[rrcId] = {
+  selectorCommands.push({
+    text: rrcId,
+    prefix: i,
     callback: function () {
       selectedVP = null;
       selectedRC = rrcId;
       updateData();
     }
-  };
-  selectorCommands['Nach Vantage Point filtern'] = {
-    callback: function () {
-      vpSelector.show();
-      vpSelector.focus();
-    }
-  };
+  });
 }
+
+selectorCommands.push({
+  prefix: maxRCNumber + 1,
+  text: 'Nach Vantage Point filtern'
+});
 
 const rcSelector = grid.set(8, 0, 1, 3, blessed.listbar, {
   label: 'Perspektive des folgenden Route Collectors anzeigen',
   commands: selectorCommands,
-  autoCommandKeys: true,
+  autoCommandKeys: false,
   style: {
     selected: {
       fg: highlightFgColor,
       bg: highlightBgColor,
+    }
+  }
+});
+
+// fix key offset
+rcSelector.onScreenEvent('keypress', function (key) {
+  if (/^[0-9]$/.test(key)) {
+    var i = +key;
+    if (!~i) i = 9;
+    if (key > maxRCNumber) {
+      vpSelector.show();
+      vpSelector.focus();
+      screen.render();
+    } else {
+      return rcSelector.selectTab(i);
     }
   }
 });
