@@ -113,7 +113,7 @@ function getDataForVPFromLastTimestamp(rc) {
         for (const address in addresses) {
           const stats = addresses[address];
           setValidationRatio(stats);
-          newSnapshot.vps[`${as}:${address}`] = {
+          newSnapshot.vps[`${as}|${address}`] = {
             as: as,
             address: address,
             stats: stats
