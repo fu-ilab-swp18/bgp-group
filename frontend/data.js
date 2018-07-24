@@ -93,9 +93,11 @@ function getDataForVPFromLastTimestamp(rc) {
 
     const abort = prepareAndPushTimestamp(res, dataCache, function (snapshot, newSnapshot) {
       newSnapshot.accumulated = {
-        valid: 0,
-        invalid: 0,
-        unknown: 0
+        stats: {
+          valid: 0,
+          invalid: 0,
+          unknown: 0
+        }
       }
       newSnapshot.vps = {};
 
@@ -117,13 +119,13 @@ function getDataForVPFromLastTimestamp(rc) {
             stats: stats
           }
 
-          newSnapshot.accumulated.valid += stats.valid;
-          newSnapshot.accumulated.invalid += stats.invalid;
-          newSnapshot.accumulated.unknown += stats.unknown;
+          newSnapshot.accumulated.stats.valid += stats.valid;
+          newSnapshot.accumulated.stats.invalid += stats.invalid;
+          newSnapshot.accumulated.stats.unknown += stats.unknown;
         }
       });
 
-      setValidationRatio(newSnapshot.accumulated);
+      setValidationRatio(newSnapshot.accumulated.stats);
     });
 
     if (abort) {

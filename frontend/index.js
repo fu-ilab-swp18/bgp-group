@@ -60,14 +60,23 @@ const informationBox = grid.set(0, 2, 4, 1, blessed.box, {
 
 // statistics
 
-const statisticsTable = grid.set(4, 2, 4, 1, contrib.table, {
-  label: 'Statistik und Informationen',
+const statisticsTableRC = grid.set(4, 2, 2, 1, contrib.table, {
+  label: 'Statistik und Informationen für den Route Collector',
   interactive: false,
   fg: 'white',
   width: '100%',
   height: '100%',
-  columnSpacing: 5, //in chars
-  columnWidth: [25, 25], /*in chars*/
+  columnSpacing: 5,
+  columnWidth: [30, 25],
+});
+
+const statisticsTableVP = grid.set(6, 2, 2, 1, contrib.table, {
+  interactive: false,
+  fg: 'white',
+  width: '100%',
+  height: '100%',
+  columnSpacing: 5,
+  columnWidth: [30, 25],
 });
 
 // RC selector
@@ -182,11 +191,10 @@ function updateData() {
       times.push(getFormattedTime(row.timestamp));
       var data = row.accumulated;
       if (selectedVPIndex) {
-        vpData = row.vps[Object.keys(row.vps)[selectedVPIndex]];
-        data = vpData.stats;
+        data = row.vps[Object.keys(row.vps)[selectedVPIndex]];
       }
       prefixData.push([
-        Math.round(data.validRatio), Math.round(data.invalidRatio)
+        Math.round(data.stats.validRatio), Math.round(data.stats.invalidRatio)
       ]);
     });
 
@@ -198,26 +206,38 @@ function updateData() {
 
 
     const [stats] = data.rc.snapshots.slice(-1);
-    var rows = [
-      [`{bold}Daten für ${selectedRC}`],
-      ['Anzahl Peers:', numeral(stats.peers).format()],
-      ['Bekannte Präfixe:', numeral(stats.prefix).format()],
-      ['Davon IPv6:', numeral(stats.prefix6).format()],
-      ['Davon IPv4:', numeral(stats.prefix4).format()]
-    ];
+    statisticsTableRC.setData({
+      headers: [],
+      data: [
+        ['ID:', selectedRC],
+        ['Anzahl Peers:', numeral(stats.peers).format()],
+        ['Bekannte Präfixe:', numeral(stats.prefix).format()],
+        ['Davon IPv6:', numeral(stats.prefix6).format()],
+        ['Davon IPv4:', numeral(stats.prefix4).format()],
+        ['Letztes Update:', moment.unix(stats.timestamp).format('DD. MMM YYYY, HH:mm')]
+      ]
+    });
 
+
+    const [vpStats] = data.vp.snapshots.slice(-1);
+    var vpData = vpStats.accumulated;
     if (selectedVPIndex) {
-      rows.push(['']);
-      rows.push([`{bold}Daten für ${vpData.as}{/bold}`, vpData.address]);
-      rows.push(['Gültige Präfixe:', numeral(vpData.stats.valid).format()]);
-      rows.push(['Ungültige Präfixe:', numeral(vpData.stats.invalid).format()]);
-      rows.push(['Nicht validierte Präfixe:', numeral(vpData.stats.unknown).format()]);
+      vpData = vpStats.vps[Object.keys(row.vps)[selectedVPIndex]];
     }
+    const rows = [];
+    if (selectedVPIndex) {
+      rows.push(['AS-Nummer:', vpData.as]);
+      rows.push(['IP-Adresse des Routers:', vpData.address]);
+      statisticsTableVP.setLabel('Daten für den Vantage Point');
+    } else {
+      statisticsTableVP.setLabel('Daten akkumuliert über alle Vantage Points dieses Route Collectors');
+    }
+    rows.push(['Gültige Präfixe:', numeral(vpData.stats.valid).format()]);
+    rows.push(['Ungültige Präfixe:', numeral(vpData.stats.invalid).format()]);
+    rows.push(['Nicht validierte Präfixe:', numeral(vpData.stats.unknown).format()]);
+    rows.push(['Letztes Update:', moment.unix(vpStats.timestamp).format('DD. MMM YYYY, HH:mm')]);
 
-    rows.push(['']);
-    rows.push(['Letztes Update:', moment.unix(stats.timestamp).format('DD. MMM YYYY, HH:mm')]);
-
-    statisticsTable.setData({
+    statisticsTableVP.setData({
       headers: [],
       data: rows
     });
